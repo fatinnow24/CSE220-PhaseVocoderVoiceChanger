@@ -1,0 +1,421 @@
+<!DOCTYPE html><html lang="en"><head>
+<meta charset="utf-8">
+<meta content="width=device-width, initial-scale=1.0" name="viewport">
+<title>Processing Lab - PhaseVocoder Studio</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700&amp;display=swap" rel="stylesheet">
+<script id="tailwind-config">
+  tailwind.config = {
+    darkMode: "class",
+    theme: {
+      extend: {
+        "colors": {
+                "surface": "#121413",
+                "error": "#ffb4ab",
+                "tertiary-fixed": "#ffdad4",
+                "background": "#121413",
+                "on-primary": "#13362f",
+                "on-secondary-container": "#87c0dd",
+                "inverse-primary": "#43655c",
+                "on-background": "#e3e2e1",
+                "error-container": "#93000a",
+                "surface-container-low": "#1a1c1b",
+                "surface-tint": "#a9cec4",
+                "on-primary-fixed": "#00201a",
+                "on-primary-fixed-variant": "#2b4d45",
+                "on-error": "#690005",
+                "on-secondary-fixed": "#001e2b",
+                "on-error-container": "#ffdad6",
+                "primary-fixed-dim": "#a9cec4",
+                "on-secondary-fixed-variant": "#004d66",
+                "outline": "#8b928f",
+                "primary-container": "#8fb3a9",
+                "secondary-container": "#034f68",
+                "sage-muted": "#3D524C",
+                "secondary-fixed-dim": "#95ceec",
+                "surface-bright": "#383939",
+                "on-surface-variant": "#c1c8c5",
+                "on-surface": "#e3e2e1",
+                "secondary": "#95ceec",
+                "on-tertiary-fixed": "#30130e",
+                "surface-charcoal": "#121417",
+                "surface-dim": "#121413",
+                "secondary-fixed": "#c0e8ff",
+                "surface-container-highest": "#333534",
+                "primary": "#aacfc4",
+                "tertiary-fixed-dim": "#efbab1",
+                "on-tertiary-fixed-variant": "#623d36",
+                "outline-variant": "#414846",
+                "tertiary-container": "#d2a097",
+                "on-secondary": "#003547",
+                "inverse-surface": "#e3e2e1",
+                "on-tertiary": "#492721",
+                "surface-navy": "#1A1F26",
+                "tertiary": "#f0bbb1",
+                "surface-container": "#1e201f",
+                "on-primary-container": "#24463e",
+                "inverse-on-surface": "#2f3130",
+                "surface-container-lowest": "#0d0f0e",
+                "surface-container-high": "#292a29",
+                "on-tertiary-container": "#5a3630",
+                "blue-muted": "#2E4756",
+                "surface-variant": "#333534",
+                "primary-fixed": "#c5eadf"
+        },
+        "borderRadius": {
+                "DEFAULT": "0.25rem",
+                "lg": "0.5rem",
+                "xl": "0.75rem",
+                "2xl": "1.25rem",
+                "3xl": "1.75rem",
+                "full": "9999px"
+        },
+        "spacing": {
+                "section-margin": "32px",
+                "container-padding": "24px",
+                "gutter": "16px",
+                "unit": "8px",
+                "card-gap": "20px"
+        },
+        "fontFamily": {
+                "body-sm": [
+                        "Manrope", "sans-serif"
+                ],
+                "headline-lg-mobile": [
+                        "Manrope", "sans-serif"
+                ],
+                "label-caps": [
+                        "Manrope", "sans-serif"
+                ],
+                "display": [
+                        "Manrope", "sans-serif"
+                ],
+                "headline-lg": [
+                        "Manrope", "sans-serif"
+                ],
+                "body-lg": [
+                        "Manrope", "sans-serif"
+                ],
+                "title-md": [
+                        "Manrope", "sans-serif"
+                ]
+        },
+        "fontSize": {
+                "body-sm": [
+                        "14px",
+                        {
+                                "lineHeight": "20px",
+                                "fontWeight": "400"
+                        }
+                ],
+                "headline-lg-mobile": [
+                        "20px",
+                        {
+                                "lineHeight": "28px",
+                                "fontWeight": "600"
+                        }
+                ],
+                "label-caps": [
+                        "12px",
+                        {
+                                "lineHeight": "16px",
+                                "letterSpacing": "0.05em",
+                                "fontWeight": "700"
+                        }
+                ],
+                "display": [
+                        "32px",
+                        {
+                                "lineHeight": "40px",
+                                "letterSpacing": "-0.02em",
+                                "fontWeight": "700"
+                        }
+                ],
+                "headline-lg": [
+                        "24px",
+                        {
+                                "lineHeight": "32px",
+                                "letterSpacing": "-0.01em",
+                                "fontWeight": "600"
+                        }
+                ],
+                "body-lg": [
+                        "16px",
+                        {
+                                "lineHeight": "24px",
+                                "fontWeight": "400"
+                        }
+                ],
+                "title-md": [
+                        "18px",
+                        {
+                                "lineHeight": "24px",
+                                "fontWeight": "600"
+                        }
+                ]
+        },
+        "boxShadow": {
+            'ambient-base': '0px 10px 30px rgba(0, 0, 0, 0.4)',
+            'ambient-active': '0px 20px 40px rgba(170, 207, 196, 0.15)',
+            'ambient-inset': 'inset 0px 4px 8px rgba(0, 0, 0, 0.4)',
+        }
+},
+    },
+  }
+</script>
+<style>
+        /* Custom scrollbar for an organic feel */
+        ::-webkit-scrollbar { width: 6px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: #333534; border-radius: 9999px; }
+        ::-webkit-scrollbar-thumb:hover { background: #414846; }
+        
+        /* Range slider styling to match soft minimalism */
+        input[type=range] {
+            -webkit-appearance: none;
+            width: 100%;
+            background: transparent;
+        }
+        input[type=range]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            height: 24px;
+            width: 24px;
+            border-radius: 50%;
+            background: #e3e2e1;
+            box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.4);
+            cursor: pointer;
+            margin-top: -8px;
+        }
+        input[type=range]::-webkit-slider-runnable-track {
+            width: 100%;
+            height: 8px;
+            cursor: pointer;
+            background: #292a29;
+            border-radius: 9999px;
+            box-shadow: inset 0px 2px 4px rgba(0, 0, 0, 0.2);
+        }
+        input[type=range]:focus {
+            outline: none;
+        }
+        
+        /* Striped background for data viz */
+        .bg-stripes {
+            background-image: repeating-linear-gradient(
+                45deg,
+                transparent,
+                transparent 4px,
+                rgba(170, 207, 196, 0.1) 4px,
+                rgba(170, 207, 196, 0.1) 8px
+            );
+        }
+    </style>
+</head>
+<body class="bg-background text-on-background font-body-lg h-screen flex overflow-hidden">
+<!-- JSON: SideNavBar (Hidden on Mobile, Visible on Desktop) -->
+<nav class="hidden lg:flex flex-col gap-2 py-6 bg-surface-container-low h-screen w-64 fixed left-0 top-0 z-50">
+<div class="px-6 pb-6">
+<h1 class="font-headline-lg text-headline-lg text-primary">Vocoder Lab</h1>
+<p class="font-body-sm text-body-sm text-on-surface-variant opacity-70">v1.0.4 - DSP Engine</p>
+</div>
+<ul class="flex flex-col gap-1 w-full flex-1">
+<li class="">
+<a class="flex items-center gap-3 text-on-surface-variant hover:bg-surface-container-highest rounded-lg px-4 py-3 mx-2 transition-all active:scale-95 duration-150" href="#">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 0;">dashboard</span>
+<span class="font-title-md text-title-md">Dashboard</span>
+</a>
+</li>
+<li class="">
+<a class="flex items-center gap-3 bg-primary-container text-on-primary-container rounded-lg px-4 py-3 mx-2 hover:bg-surface-container-highest transition-all active:scale-95 duration-150" href="#">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">science</span>
+<span class="font-title-md text-title-md">Processing Lab</span>
+</a>
+</li>
+
+<li class="mt-auto">
+<a class="flex items-center gap-3 text-on-surface-variant hover:bg-surface-container-highest rounded-lg px-4 py-3 mx-2 transition-all active:scale-95 duration-150" href="#">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 0;">settings</span>
+<span class="font-title-md text-title-md">Settings</span>
+</a>
+</li>
+</ul>
+</nav>
+<!-- Main Content Wrapper -->
+<div class="flex-1 flex flex-col h-full lg:ml-64 w-full relative">
+<!-- JSON: TopNavBar (Visible on Mobile, Hidden on Desktop) -->
+<header class="lg:hidden bg-surface shadow-sm w-full z-40 sticky top-0">
+<div class="flex justify-between items-center px-container-padding py-unit w-full max-w-7xl mx-auto">
+<span class="font-display text-display text-primary">PhaseVocoder Studio</span>
+<nav class="hidden md:flex gap-6">
+<a class="text-on-surface-variant font-medium hover:text-primary transition-colors duration-200 cursor-pointer active:opacity-80" href="#">Dashboard</a>
+<a class="text-primary font-bold border-b-2 border-primary pb-1 hover:text-primary transition-colors duration-200 cursor-pointer active:opacity-80" href="#">Processing Lab</a>
+<a class="text-on-surface-variant font-medium hover:text-primary transition-colors duration-200 cursor-pointer active:opacity-80" href="#">Theory/Docs</a>
+<a class="text-on-surface-variant font-medium hover:text-primary transition-colors duration-200 cursor-pointer active:opacity-80" href="#">Settings</a>
+</nav>
+<div class="flex gap-4 items-center">
+<span class="material-symbols-outlined text-primary cursor-pointer hover:opacity-80 transition-opacity">settings</span>
+<span class="material-symbols-outlined text-primary cursor-pointer hover:opacity-80 transition-opacity">account_circle</span>
+</div>
+</div>
+</header>
+<!-- Main Workspace -->
+<main class="flex-1 overflow-y-auto p-container-padding md:p-section-margin">
+<header class="mb-section-margin flex justify-between items-end">
+<div>
+<h2 class="font-display text-display text-on-background lg:hidden mb-2">Processing Lab</h2>
+<p class="font-body-lg text-body-lg text-on-surface-variant max-w-2xl">Manipulate audio streams in real-time. Adjust spectral parameters below and preview the resulting waveform transformations before synthesizing.</p>
+</div>
+</header>
+<div class="grid grid-cols-1 lg:grid-cols-12 gap-card-gap">
+<!-- Left Sidebar: Parameters -->
+<section class="lg:col-span-3 flex flex-col gap-card-gap">
+<!-- Pitch Shift Card -->
+<div class="bg-surface-container-lowest rounded-3xl p-6 shadow-ambient-base flex flex-col gap-6">
+<div class="flex justify-between items-center">
+<h3 class="font-title-md text-title-md text-on-background flex items-center gap-2">
+<div class="w-8 h-8 rounded-full bg-secondary-container flex items-center justify-center opacity-80">
+<span class="material-symbols-outlined text-secondary text-sm">tune</span>
+</div>
+                                Pitch Shift
+                            </h3>
+<span class="font-label-caps text-label-caps text-primary bg-primary-fixed rounded-full px-3 py-1">+2 st</span>
+</div>
+<div class="flex flex-col gap-3">
+<input class="w-full" max="12" min="-12" type="range" value="2">
+<div class="flex justify-between font-label-caps text-label-caps text-on-surface-variant opacity-60">
+<span class="">-12</span>
+<span class="">0</span>
+<span class="">+12</span>
+</div>
+</div>
+</div>
+<!-- Time Stretch Card -->
+<div class="bg-surface-container-lowest rounded-3xl p-6 shadow-ambient-base flex flex-col gap-6">
+<div class="flex justify-between items-center">
+<h3 class="font-title-md text-title-md text-on-background flex items-center gap-2">
+<div class="w-8 h-8 rounded-full bg-primary-fixed flex items-center justify-center opacity-80">
+<span class="material-symbols-outlined text-primary text-sm">speed</span>
+</div>
+                                Time Stretch
+                            </h3>
+<span class="font-label-caps text-label-caps text-primary bg-primary-fixed rounded-full px-3 py-1">1.2x</span>
+</div>
+<div class="flex flex-col gap-3">
+<input class="w-full" max="2.0" min="0.5" step="0.1" type="range" value="1.2">
+<div class="flex justify-between font-label-caps text-label-caps text-on-surface-variant opacity-60">
+<span class="">0.5x</span>
+<span class="">1.0x</span>
+<span class="">2.0x</span>
+</div>
+</div>
+</div>
+<!-- Auxiliary Controls -->
+<div class="bg-surface-container-lowest rounded-3xl p-6 shadow-ambient-base flex flex-col gap-4">
+<h4 class="font-title-md text-title-md text-on-background mb-2">Phase Locking</h4>
+<label class="flex items-center gap-4 cursor-pointer group">
+<div class="w-12 h-6 bg-primary rounded-full relative shadow-ambient-inset transition-colors">
+<div class="absolute right-1 top-1 w-4 h-4 bg-white rounded-full shadow-sm transition-transform"></div>
+</div>
+<span class="font-body-sm text-body-sm text-on-surface-variant group-hover:text-primary transition-colors">Identity Phase</span>
+</label>
+<label class="flex items-center gap-4 cursor-pointer group">
+<div class="w-12 h-6 bg-surface-container-highest rounded-full relative shadow-ambient-inset transition-colors">
+<div class="absolute left-1 top-1 w-4 h-4 bg-white rounded-full shadow-sm transition-transform"></div>
+</div>
+<span class="font-body-sm text-body-sm text-on-surface-variant group-hover:text-primary transition-colors">Transient Preservation</span>
+</label>
+</div>
+</section>
+<!-- Center Area: Visuals & Action -->
+<section class="lg:col-span-6 flex flex-col gap-card-gap">
+<!-- Spectrogram Preview -->
+<div class="bg-surface-navy rounded-3xl p-6 shadow-ambient-base flex flex-col h-80 relative overflow-hidden group">
+<div class="flex justify-between items-start relative z-10 mb-4">
+<h3 class="font-title-md text-title-md text-on-surface flex items-center gap-2">
+<span class="material-symbols-outlined">graphic_eq</span>
+                                Live Spectrogram
+                            </h3>
+<button class="w-10 h-10 rounded-full bg-black/10 flex items-center justify-center hover:bg-black/20 transition-colors">
+<span class="material-symbols-outlined text-on-surface">fullscreen</span>
+</button>
+</div>
+<!-- Pseudo Spectrogram Visual -->
+<div class="flex-1 flex items-end justify-between gap-1 mt-4 relative z-10 px-2">
+<!-- Generated Bars to mimic data -->
+<div class="w-full bg-primary-container/20 rounded-t-full h-[30%]"></div>
+<div class="w-full bg-stripes rounded-t-full h-[50%]"></div>
+<div class="w-full bg-primary-container rounded-t-full h-[85%]"></div>
+<div class="w-full bg-stripes rounded-t-full h-[60%]"></div>
+<div class="w-full bg-primary-container/20 rounded-t-full h-[40%]"></div>
+<div class="w-full bg-stripes rounded-t-full h-[70%]"></div>
+<div class="w-full bg-primary-container/20 rounded-t-full h-[20%]"></div>
+</div>
+<!-- Soft overlay gradient -->
+</div>
+<!-- Input Waveform -->
+<div class="bg-surface-container-lowest rounded-3xl p-6 shadow-ambient-base flex flex-col h-48">
+<h3 class="font-title-md text-title-md text-on-background flex items-center gap-2 mb-4">
+<span class="material-symbols-outlined text-outline">waves</span>
+                            Input Signal Buffer
+                        </h3>
+<div class="flex-1 bg-surface-container rounded-xl flex items-center justify-center relative overflow-hidden border-none">
+<!-- Abstract Waveform representation -->
+<svg class="w-full h-full text-primary-container opacity-40" preserveAspectRatio="none" viewBox="0 0 100 100">
+<path d="M0,50 Q12.5,20 25,50 T50,50 T75,50 T100,50" fill="none" stroke="currentColor" stroke-width="2"></path>
+<path d="M0,50 Q12.5,80 25,50 T50,50 T75,50 T100,50" fill="none" stroke="currentColor" stroke-width="2"></path>
+</svg>
+<div class="absolute inset-y-0 left-1/3 w-0.5 bg-error opacity-50"></div>
+</div>
+</div>
+<!-- Primary Action -->
+<button class="w-full bg-primary hover:bg-surface-tint text-on-primary-fixed font-headline-lg text-headline-lg py-6 rounded-3xl hover:shadow-ambient-base transition-all duration-300 flex justify-center items-center gap-4 group active:scale-[0.98]">
+<span class="material-symbols-outlined text-3xl group-hover:rotate-90 transition-transform duration-500">play_circle</span>
+                        Synthesize Audio
+                    </button>
+</section>
+<!-- Right Sidebar: Theory/Docs -->
+<section class="lg:col-span-3 flex flex-col h-full">
+<div class="bg-surface-navy rounded-3xl p-6 shadow-ambient-base flex-1 flex flex-col relative overflow-hidden">
+<!-- Background decorative icon -->
+<span class="material-symbols-outlined absolute -bottom-10 -right-10 text-[160px] text-surface-container-highest opacity-50 select-none pointer-events-none" style="font-variation-settings: 'FILL' 1;">auto_awesome_mosaic</span>
+<h3 class="font-title-md text-title-md text-on-surface flex items-center gap-2 mb-6 relative z-10">
+<div class="w-8 h-8 rounded-full bg-surface-container-highest flex items-center justify-center">
+<span class="material-symbols-outlined text-on-surface text-sm">lightbulb</span>
+</div>
+                            DSP Mechanics
+                        </h3>
+<div class="flex-1 flex flex-col gap-6 relative z-10">
+<div class="bg-surface-container-lowest p-5 rounded-2xl border-none shadow-sm">
+<h4 class="font-label-caps text-label-caps text-primary mb-2">Time-Shifting Property</h4>
+<p class="font-body-sm text-body-sm text-on-surface-variant leading-relaxed">
+                                    When applying Time Stretch, the Phase Vocoder relies on the Fourier transform's time-shifting property. Stretching the magnitude spectrum requires corresponding adjustments to the phase derivatives (instantaneous frequency) to maintain coherence across overlapping frames.
+                                </p>
+</div>
+<div class="bg-surface-container-lowest p-5 rounded-2xl border-none shadow-sm">
+<h4 class="font-label-caps text-label-caps text-secondary mb-2">Windowing &amp; Overlap-Add</h4>
+<p class="font-body-sm text-body-sm text-on-surface-variant leading-relaxed">
+                                    The signal is multiplied by a Hann window (default) before transformation. To reconstruct the continuous signal without amplitude modulation artifacts, a minimum of 75% overlap is utilized during the inverse transform phase.
+                                </p>
+</div>
+<a class="mt-auto font-body-sm text-body-sm text-primary flex items-center gap-1 hover:underline w-fit" href="#">
+                                Read full documentation
+                                <span class="material-symbols-outlined text-sm">arrow_forward</span>
+</a>
+</div>
+</div>
+</section>
+</div>
+<!-- JSON: Footer -->
+<footer class="mt-section-margin flex flex-col md:flex-row justify-between items-center px-container-padding py-6 bg-surface-container-low w-full rounded-2xl">
+<span class="font-title-md text-title-md text-on-surface mb-4 md:mb-0">© 2024 PhaseVocoder DSP. All rights reserved.</span>
+<nav class="flex gap-6">
+<a class="font-label-caps text-label-caps text-secondary hover:underline transition-all" href="#">Documentation</a>
+<a class="font-label-caps text-label-caps text-secondary hover:underline transition-all" href="#">API Support</a>
+<a class="font-label-caps text-label-caps text-secondary hover:underline transition-all" href="#">Github</a>
+</nav>
+</footer>
+</main>
+</div>
+
+
+</body></html>
