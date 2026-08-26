@@ -1,0 +1,1 @@
+# Dummy audioop for pydub on Python 3.13
