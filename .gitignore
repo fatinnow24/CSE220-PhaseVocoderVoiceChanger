@@ -1,0 +1,80 @@
+# ──────────────────────────────────────────────
+# Python / Django (backend)
+# ──────────────────────────────────────────────
+__pycache__/
+*.py[cod]
+*$py.class
+*.pyo
+*.pyd
+
+# Virtual environments
+.venv/
+venv/
+env/
+ENV/
+
+# Django artifacts
+db.sqlite3
+*.log
+local_settings.py
+
+# Pytest / coverage
+.pytest_cache/
+.coverage
+htmlcov/
+*.cover
+
+# MyPy / type checkers
+.mypy_cache/
+.dmypy.json
+
+# Environment variables / secrets
+.env
+.env.*
+!.env.example
+
+# User-generated media
+media/uploads/*
+media/processed/*
+
+# Keep media directories in Git
+!media/uploads/.gitkeep
+!media/processed/.gitkeep
+
+# ──────────────────────────────────────────────
+# Node / React / Vite (frontend)
+# ──────────────────────────────────────────────
+node_modules/
+frontend/node_modules/
+dist/
+frontend/dist/
+.vite/
+frontend/.vite/
+
+# ──────────────────────────────────────────────
+# AI-generated image dump folders
+# ──────────────────────────────────────────────
+comparison_results_dark_mode_adjusted/
+comparison_results_refined_layout/
+dashboard_dark_mode_adjusted/
+dashboard_refined_layout/
+processing_lab_dark_mode_adjusted/
+processing_lab_refined_layout/
+serene_logic_1/
+serene_logic_2/
+djangoSample/
+
+# ──────────────────────────────────────────────
+# IDE / editors
+# ──────────────────────────────────────────────
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# ──────────────────────────────────────────────
+# OS
+# ──────────────────────────────────────────────
+.DS_Store
+Thumbs.db
+desktop.ini
