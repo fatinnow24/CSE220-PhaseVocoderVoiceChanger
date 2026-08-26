@@ -45,8 +45,8 @@ export default function Dashboard() {
   return (
     <div className="max-w-6xl mx-auto space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-500">
       <header className="mb-8">
-        <h1 className="text-display font-bold text-on-surface mb-2">Welcome to DSP Engine</h1>
-        <p className="text-headline-lg font-medium text-on-surface-variant">Upload an audio file to begin processing.</p>
+        <h1 className="text-display font-bold text-on-surface mb-2">Welcome to PhasePlay</h1>
+        <p className="text-headline-lg font-medium text-on-surface-variant">An Interactive Phase Vocoder Voice Changer</p>
       </header>
 
       <div className="grid grid-cols-1 md:grid-cols-12 gap-6">
