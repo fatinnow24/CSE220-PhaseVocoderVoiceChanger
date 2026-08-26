@@ -9,6 +9,7 @@ import { useNavigate } from 'react-router-dom';
 
 export default function Compare() {
   const [semitones, setSemitones] = useState(5);
+  const [stretchFactor, setStretchFactor] = useState(1.0);
   const [isComparing, setIsComparing] = useState(false);
   const { comparisonResult, setComparisonResult, selectedFile } = useAudioStore();
   const navigate = useNavigate();
@@ -19,15 +20,16 @@ export default function Compare() {
       navigate('/studio');
       return;
     }
-    
+
     setIsComparing(true);
     try {
       const res = await processCompare({
         file_id: selectedFile.id,
         semitones: semitones,
+        stretch_factor: stretchFactor,
         n_fft: 2048,
         ha: 512,
-        window_type: 'hann'
+        window_type: 'hann',
       });
       setComparisonResult(res.data.data);
     } catch (e) {
@@ -45,23 +47,30 @@ export default function Compare() {
         <p className="text-headline-lg font-medium text-on-surface-variant">Analyze Phase Vocoder vs Naive Resampling</p>
       </header>
 
-      <Card className="mb-8 flex flex-col md:flex-row items-center gap-6">
-        <div className="flex-1 w-full">
-          <Slider 
-            label="Target Pitch Shift" 
-            min={-12} max={12} step={1} 
-            value={semitones} 
+      <Card className="mb-8 flex flex-col gap-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <Slider
+            label="Target Pitch Shift"
+            min={-12} max={12} step={1}
+            value={semitones}
             onChange={setSemitones}
             formatValue={(v) => `${v > 0 ? '+' : ''}${v} st`}
           />
+          <Slider
+            label="Target Time Stretch"
+            min={0.25} max={2.0} step={0.05}
+            value={stretchFactor}
+            onChange={setStretchFactor}
+            formatValue={(v) => `${v.toFixed(2)}x`}
+          />
         </div>
-        <Button 
-          variant="primary" 
-          size="lg" 
-          icon="compare" 
+        <Button
+          variant="primary"
+          size="lg"
+          icon="compare"
           loading={isComparing}
           onClick={handleCompare}
-          className="shrink-0 w-full md:w-auto"
+          className="w-full md:w-auto self-end"
         >
           Run Comparison
         </Button>

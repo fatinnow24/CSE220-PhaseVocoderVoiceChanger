@@ -59,24 +59,38 @@ def time_stretch(
     ratio = float(hs) / float(ha)
 
     for i in range(n_frames):
-        if i == 0:
-            # First frame: trivial instantaneous frequency equals nominal bin freq
-            omega_inst = 2.0 * np.pi * ha * np.arange(n_fft) / n_fft
-        else:
-            omega_inst = estimate_instantaneous_frequency(
-                phase[i], phase[i - 1], ha, n_fft
-            )
-
-        # ← THE CRITICAL FIX: multiply by Hs/Ha, NOT by 1.0
-        phi_synth = phi_synth + omega_inst * ratio
-
+        # Emit the current synthesis frame FIRST (using phi_synth as-is for i=0,
+        # which is just phase[0], the correct starting phase), then update.
         synth_spec = mag[i] * np.exp(1j * phi_synth)
         synth_frames.append(compute_ifft(synth_spec))
 
+        # Estimate instantaneous frequency for the NEXT frame's phase advance
+        if i < n_frames - 1:
+            omega_inst = estimate_instantaneous_frequency(
+                phase[i + 1], phase[i], ha, n_fft
+            )
+        else:
+            omega_inst = 2.0 * np.pi * ha * np.arange(n_fft) / n_fft
+
+        # Advance synthesis phase by one synthesis hop
+        phi_synth = phi_synth + omega_inst * ratio
+
+
     original_length = int(round(len(signal) * stretch_factor))
-    return reconstruct_signal_wola(
+    out = reconstruct_signal_wola(
         np.array(synth_frames), hs, original_length, n_fft, window_type
     )
+
+    # RMS-normalize output to match input level.
+    # The WOLA overlap-add can produce occasional spike artifacts that make
+    # the peak >> RMS. Without this, write_wav peak-normalizes by the spike,
+    # silently reducing perceived loudness by 10–30× compared to naive resampling.
+    in_rms = np.sqrt(np.mean(signal ** 2))
+    out_rms = np.sqrt(np.mean(out ** 2))
+    if out_rms > 1e-8 and in_rms > 1e-8:
+        out = out * (in_rms / out_rms)
+
+    return out
 
 
 def time_stretch_with_phase_locking(
@@ -105,45 +119,50 @@ def time_stretch_with_phase_locking(
     ratio = float(hs) / float(ha)
 
     for i in range(n_frames):
-        if i == 0:
-            omega_inst = 2.0 * np.pi * ha * np.arange(n_fft) / n_fft
-        else:
-            omega_inst = estimate_instantaneous_frequency(
-                phase[i], phase[i - 1], ha, n_fft
-            )
-
-        phi_synth = phi_synth + omega_inst * ratio
-
-        # --- Identity phase locking ---
-        # Find spectral peaks (bins whose magnitude exceeds both neighbours)
+        # --- Identity phase locking on current phi_synth ---
         m = mag[i]
         peaks = np.where(
             (m[1:-1] > m[:-2]) & (m[1:-1] > m[2:])
-        )[0] + 1  # +1 because we sliced off first element
+        )[0] + 1
 
         locked_phi = phi_synth.copy()
         if len(peaks) > 0:
-            # Build a nearest-peak assignment for every bin
-            # Each non-peak bin copies the phase of its closest peak
             peak_set = set(peaks.tolist())
             for k in range(n_fft):
                 if k in peak_set:
                     continue
-                # Find nearest peak
                 distances = np.abs(peaks - k)
                 nearest_peak = peaks[np.argmin(distances)]
-                # Apply phase offset relative to peak
                 locked_phi[k] = phi_synth[nearest_peak] + (
                     phase[i][k] - phase[i][nearest_peak]
                 )
 
+        # Emit frame using current (locked) phase, then advance
         synth_spec = m * np.exp(1j * locked_phi)
         synth_frames.append(compute_ifft(synth_spec))
 
+        # Advance synthesis phase for next frame
+        if i < n_frames - 1:
+            omega_inst = estimate_instantaneous_frequency(
+                phase[i + 1], phase[i], ha, n_fft
+            )
+        else:
+            omega_inst = 2.0 * np.pi * ha * np.arange(n_fft) / n_fft
+
+        phi_synth = phi_synth + omega_inst * ratio
+
     original_length = int(round(len(signal) * stretch_factor))
-    return reconstruct_signal_wola(
+    out = reconstruct_signal_wola(
         np.array(synth_frames), hs, original_length, n_fft, window_type
     )
+
+    # RMS-normalize to match input level
+    in_rms = np.sqrt(np.mean(signal ** 2))
+    out_rms = np.sqrt(np.mean(out ** 2))
+    if out_rms > 1e-8 and in_rms > 1e-8:
+        out = out * (in_rms / out_rms)
+
+    return out
 
 
 def pitch_shift(
@@ -167,7 +186,7 @@ def pitch_shift(
 
     pitch_factor = 2.0 ** (semitones / 12.0)
     stretch_fn = time_stretch_with_phase_locking if phase_locking else time_stretch
-    stretched = stretch_fn(signal, sample_rate, 1.0 / pitch_factor, n_fft, ha, window_type)
+    stretched = stretch_fn(signal, sample_rate, pitch_factor, n_fft, ha, window_type)
     return naive_resample(stretched, sample_rate, pitch_factor)
 
 

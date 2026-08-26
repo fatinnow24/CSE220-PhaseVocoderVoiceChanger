@@ -22,6 +22,9 @@ def test_pitch_shift_up_12st():
     sig = generate_sine(440, 1.0, 0.5, sr)
     shifted = pitch_shift(sig, sr, 12, 2048, 512, 'hann')
     
+    # Assert duration is preserved (within small margin due to STFT windowing/padding)
+    assert abs(len(shifted) - len(sig)) < 2048
+    
     spec = compute_fft(shifted[:2048])
     mag = magnitude_spectrum(spec)
     freqs = frequency_axis(2048, sr)
@@ -32,6 +35,9 @@ def test_pitch_shift_down_12st():
     sr = 44100
     sig = generate_sine(440, 1.0, 0.5, sr)
     shifted = pitch_shift(sig, sr, -12, 2048, 512, 'hann')
+    
+    # Assert duration is preserved
+    assert abs(len(shifted) - len(sig)) < 2048
     
     spec = compute_fft(shifted[:2048])
     mag = magnitude_spectrum(spec)

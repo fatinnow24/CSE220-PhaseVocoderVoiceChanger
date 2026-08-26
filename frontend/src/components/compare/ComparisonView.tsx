@@ -1,6 +1,6 @@
 import { ComparisonResult } from '../../types';
 import Card from '../ui/Card';
-import AudioPlayer from '../audio/AudioPlayer';
+import NativeAudioPlayer from '../audio/NativeAudioPlayer';
 import { getStreamUrl } from '../../api/client';
 
 interface ComparisonViewProps {
@@ -10,6 +10,9 @@ interface ComparisonViewProps {
 export default function ComparisonView({ result }: ComparisonViewProps) {
   const { metrics, pv_file, naive_file } = result;
 
+  const pitchApplied = metrics.semitones !== 0;
+  const stretchApplied = metrics.stretch_factor !== 1.0;
+
   return (
     <div className="flex flex-col gap-6 mt-8">
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
@@ -18,7 +21,7 @@ export default function ComparisonView({ result }: ComparisonViewProps) {
             <h3 className="text-title-md font-bold text-on-primary-container">Phase Vocoder Output</h3>
             <span className="bg-primary text-on-primary px-3 py-1 rounded-full text-label-caps">Advanced</span>
           </div>
-          <AudioPlayer url={getStreamUrl(pv_file.id)} title="Phase Vocoder Output" />
+          <NativeAudioPlayer url={getStreamUrl(pv_file.id)} title="Phase Vocoder Output" />
         </Card>
 
         <Card variant="colored" color="secondary">
@@ -26,7 +29,7 @@ export default function ComparisonView({ result }: ComparisonViewProps) {
             <h3 className="text-title-md font-bold text-on-secondary-fixed">Naive Resampling</h3>
             <span className="bg-secondary text-on-secondary px-3 py-1 rounded-full text-label-caps">Basic</span>
           </div>
-          <AudioPlayer url={getStreamUrl(naive_file.id)} title="Naive Output" />
+          <NativeAudioPlayer url={getStreamUrl(naive_file.id)} title="Naive Output" />
         </Card>
       </div>
 
@@ -42,24 +45,54 @@ export default function ComparisonView({ result }: ComparisonViewProps) {
               </tr>
             </thead>
             <tbody className="text-body-lg">
+              {pitchApplied && (
+                <tr className="border-b border-surface-container-high">
+                  <td className="py-4 px-4 font-medium">Pitch Shifted</td>
+                  <td className="py-4 px-4"><span className="text-green-600 font-bold">?</span> {metrics.semitones > 0 ? '+' : ''}{metrics.semitones} st</td>
+                  <td className="py-4 px-4"><span className="text-green-600 font-bold">?</span> {metrics.semitones > 0 ? '+' : ''}{metrics.semitones} st</td>
+                </tr>
+              )}
+              {stretchApplied && (
+                <tr className="border-b border-surface-container-high">
+                  <td className="py-4 px-4 font-medium">Time Stretched</td>
+                  <td className="py-4 px-4"><span className="text-green-600 font-bold">?</span> {metrics.stretch_factor.toFixed(2)}x</td>
+                  <td className="py-4 px-4"><span className="text-green-600 font-bold">?</span> {metrics.stretch_factor.toFixed(2)}x</td>
+                </tr>
+              )}
               <tr className="border-b border-surface-container-high">
-                <td className="py-4 px-4 font-medium">Pitch Changed</td>
-                <td className="py-4 px-4"><span className="text-green-600 font-bold">✓</span> {metrics.semitones > 0 ? '+' : ''}{metrics.semitones} st</td>
-                <td className="py-4 px-4"><span className="text-green-600 font-bold">✓</span> {metrics.semitones > 0 ? '+' : ''}{metrics.semitones} st</td>
-              </tr>
-              <tr className="border-b border-surface-container-high">
-                <td className="py-4 px-4 font-medium">Duration Preserved</td>
-                <td className="py-4 px-4">
-                  {Math.abs(metrics.pv.duration - metrics.original.duration) < 0.1 
-                    ? <><span className="text-green-600 font-bold">✓</span> Same ({metrics.pv.duration.toFixed(2)}s)</>
-                    : <><span className="text-yellow-600 font-bold">⚠</span> Slightly Off ({metrics.pv.duration.toFixed(2)}s)</>}
+                <td className="py-4 px-4 font-medium">
+                  {stretchApplied ? 'Output Duration' : 'Duration Preserved'}
                 </td>
                 <td className="py-4 px-4">
-                  {Math.abs(metrics.naive.duration - metrics.original.duration) < 0.1
-                    ? <><span className="text-green-600 font-bold">✓</span> Same ({metrics.naive.duration.toFixed(2)}s)</>
-                    : <><span className="text-red-600 font-bold">✗</span> Changed ({metrics.naive.duration.toFixed(2)}s)</>}
+                  {stretchApplied
+                    ? <><span className="text-primary font-bold">{metrics.pv.duration.toFixed(2)}s</span> ({(metrics.pv.duration / metrics.original.duration).toFixed(2)}x)</>
+                    : Math.abs(metrics.pv.duration - metrics.original.duration) < 0.1
+                      ? <><span className="text-green-600 font-bold">?</span> Same ({metrics.pv.duration.toFixed(2)}s)</>
+                      : <><span className="text-yellow-600 font-bold">?</span> Slightly Off ({metrics.pv.duration.toFixed(2)}s)</>}
+                </td>
+                <td className="py-4 px-4">
+                  {stretchApplied
+                    ? <><span className="text-secondary font-bold">{metrics.naive.duration.toFixed(2)}s</span> ({(metrics.naive.duration / metrics.original.duration).toFixed(2)}x)</>
+                    : Math.abs(metrics.naive.duration - metrics.original.duration) < 0.1
+                      ? <><span className="text-green-600 font-bold">?</span> Same ({metrics.naive.duration.toFixed(2)}s)</>
+                      : <><span className="text-red-600 font-bold">?</span> Changed ({metrics.naive.duration.toFixed(2)}s)</>}
                 </td>
               </tr>
+              {pitchApplied && (
+                <tr className="border-b border-surface-container-high">
+                  <td className="py-4 px-4 font-medium">Pitch Accuracy</td>
+                  <td className="py-4 px-4">
+                    {metrics.pv.dominant_freq > 0
+                      ? <><span className="text-green-600 font-bold">?</span> {metrics.pv.dominant_freq.toFixed(1)} Hz (target {metrics.pv.expected_freq.toFixed(1)} Hz)</>
+                      : <span className="text-on-surface-variant">�</span>}
+                  </td>
+                  <td className="py-4 px-4">
+                    {metrics.naive.dominant_freq > 0
+                      ? <>{metrics.naive.dominant_freq.toFixed(1)} Hz (target {metrics.naive.expected_freq.toFixed(1)} Hz)</>
+                      : <span className="text-on-surface-variant">�</span>}
+                  </td>
+                </tr>
+              )}
               <tr className="border-b border-surface-container-high">
                 <td className="py-4 px-4 font-medium">Algorithm</td>
                 <td className="py-4 px-4 text-on-surface-variant">STFT + Phase Propagation</td>

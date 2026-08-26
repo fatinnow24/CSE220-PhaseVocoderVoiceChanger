@@ -22,10 +22,17 @@ def read_audio_file(file_path: str) -> tuple[np.ndarray, int]:
         return samples, audio.frame_rate
 
 def write_wav(signal: np.ndarray, sample_rate: int, path: str) -> None:
-    # Normalize
-    max_val = np.max(np.abs(signal))
-    if max_val > 1.0:
-        signal = signal / max_val
+    # Normalize to a consistent RMS level (−9 dBFS ≈ 0.35 RMS).
+    # Peak normalization is wrong here because phase-vocoder outputs can have a
+    # high crest factor (peak >> RMS from WOLA boundary spikes), which causes
+    # write_wav to silently divide the level by 10–30× relative to naive resampling.
+    # RMS normalization makes all processed outputs sound at the same loudness.
+    target_rms = 0.35
+    rms = float(np.sqrt(np.mean(signal.astype(np.float64) ** 2)))
+    if rms > 1e-8:
+        signal = signal * (target_rms / rms)
+    # Hard-clip any residual spikes so PCM_16 doesn't wrap/distort
+    signal = np.clip(signal, -1.0, 1.0)
     sf.write(path, signal, sample_rate, subtype='PCM_16')
 
 def get_audio_info(file_path: str) -> dict:

@@ -57,6 +57,7 @@ export interface ComparisonResult {
   naive_file: AudioFile;
   metrics: {
     semitones: number;
+    stretch_factor: number;
     pitch_factor: number;
     original: { duration: number; dominant_freq: number };
     pv: { duration: number; dominant_freq: number; expected_freq: number };

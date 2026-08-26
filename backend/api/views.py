@@ -186,32 +186,51 @@ def process_compare(request):
         data = request.data
         af = AudioFile.objects.get(id=data['file_id'])
         semitones = float(data.get('semitones', 0.0))
+        stretch_factor = float(data.get('stretch_factor', 1.0))
         n_fft = int(data.get('n_fft', 2048))
         ha = int(data.get('ha', 512))
         window_type = data.get('window_type', 'hann')
 
         signal, sr = read_audio_file(af.file_path)
         orig_duration = len(signal) / sr
-        orig_dominant = float(np.array([0.0])[0])  # placeholder
+        orig_dominant = 0.0
         try:
             from dsp.phase_vocoder import dominant_frequency
             orig_dominant = dominant_frequency(signal, sr)
         except Exception:
             pass
 
-        # Phase Vocoder
+        # --- Phase Vocoder pipeline ---
+        # Step 1: pitch shift (duration-preserving via phase vocoder)
         res_pv = pitch_shift(signal, sr, semitones, n_fft, ha, window_type)
-        af_pv = _save_new_audio(res_pv, sr, f"pv_{semitones:+.1f}st_{af.original_filename}", 'processed', parent=af, params={'algo': 'pv', 'semitones': semitones})
+        # Step 2: time stretch independently via phase vocoder
+        if stretch_factor != 1.0:
+            res_pv = time_stretch(res_pv, sr, stretch_factor, n_fft, ha, window_type)
+        af_pv = _save_new_audio(
+            res_pv, sr,
+            f"pv_{semitones:+.1f}st_{stretch_factor:.2f}x_{af.original_filename}",
+            'processed', parent=af,
+            params={'algo': 'pv', 'semitones': semitones, 'stretch_factor': stretch_factor}
+        )
         pv_dominant = 0.0
         try:
             pv_dominant = dominant_frequency(res_pv, sr)
         except Exception:
             pass
 
-        # Naive Resampling
-        factor = semitones_to_pitch_factor(semitones)
-        res_naive = naive_resample(signal, sr, factor)
-        af_naive = _save_new_audio(res_naive, sr, f"naive_{semitones:+.1f}st_{af.original_filename}", 'processed', parent=af, params={'algo': 'naive', 'semitones': semitones})
+        # --- Naive Resampling pipeline ---
+        # Naive pitch shift via resampling (entangles pitch and duration)
+        pitch_factor = semitones_to_pitch_factor(semitones)
+        res_naive = naive_resample(signal, sr, pitch_factor)
+        # Naive time stretch: a second resample to hit the desired duration
+        if stretch_factor != 1.0:
+            res_naive = naive_resample(res_naive, sr, stretch_factor)
+        af_naive = _save_new_audio(
+            res_naive, sr,
+            f"naive_{semitones:+.1f}st_{stretch_factor:.2f}x_{af.original_filename}",
+            'processed', parent=af,
+            params={'algo': 'naive', 'semitones': semitones, 'stretch_factor': stretch_factor}
+        )
         naive_dominant = 0.0
         try:
             naive_dominant = dominant_frequency(res_naive, sr)
@@ -222,7 +241,8 @@ def process_compare(request):
 
         metrics = {
             'semitones': semitones,
-            'pitch_factor': factor,
+            'stretch_factor': stretch_factor,
+            'pitch_factor': pitch_factor,
             'original': {
                 'duration': orig_duration,
                 'dominant_freq': orig_dominant,
@@ -246,7 +266,6 @@ def process_compare(request):
         })
     except Exception as e:
         return _error(str(e))
-
 
 @api_view(['POST'])
 def process_effect_chain(request):
@@ -458,3 +477,4 @@ def rename_file(request, file_id):
         return _error('File not found', 404)
     except Exception as e:
         return _error(str(e))
+

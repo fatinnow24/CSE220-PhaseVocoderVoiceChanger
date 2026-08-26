@@ -14,8 +14,8 @@ export default function SideNav() {
   return (
     <aside className="hidden lg:flex flex-col fixed left-0 top-0 h-screen w-64 bg-surface-container-lowest border-r border-surface-container-high py-6 px-4">
       <div className="mb-8 px-2">
-        <h1 className="text-headline-lg text-primary font-bold">Vocoder Lab</h1>
-        <p className="text-body-sm text-on-surface-variant">v1.0 — DSP Engine</p>
+        <h1 className="text-headline-lg text-primary font-bold">PhasePlay</h1>
+        <p className="text-body-sm text-on-surface-variant">v1.0 — Phase Vocoder</p>
       </div>
       <nav className="flex-1 space-y-1">
         {navItems.map((item) => (
