@@ -6,6 +6,7 @@ import Compare from './pages/Compare';
 import Effects from './pages/Effects';
 import Signals from './pages/Signals';
 import Settings from './pages/Settings';
+import Theory from './pages/Theory';
 
 export default function App() {
   return (
@@ -17,6 +18,7 @@ export default function App() {
           <Route path="/compare" element={<Compare />} />
           <Route path="/effects" element={<Effects />} />
           <Route path="/signals" element={<Signals />} />
+          <Route path="/theory" element={<Theory />} />
           <Route path="/settings" element={<Settings />} />
         </Routes>
       </AppShell>

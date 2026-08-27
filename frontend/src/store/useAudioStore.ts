@@ -49,6 +49,7 @@ interface AudioStore {
   setPresets: (p: EffectPreset[]) => void;
   setActiveTab: (t: string) => void;
   setVizMode: (m: 'waveform' | 'spectrum' | 'spectrogram') => void;
+  clearFiles: () => void;
 }
 
 export const useAudioStore = create<AudioStore>((set) => ({
@@ -114,4 +115,5 @@ export const useAudioStore = create<AudioStore>((set) => ({
   setPresets: (p) => set({ presets: p }),
   setActiveTab: (t) => set({ activeTab: t }),
   setVizMode: (m) => set({ vizMode: m }),
+  clearFiles: () => set({ files: [], selectedFile: null }),
 }));

@@ -4,13 +4,33 @@ import UploadZone from '../components/audio/UploadZone';
 import Card from '../components/ui/Card';
 import AudioFileCard from '../components/audio/AudioFileCard';
 import { useAudioStore } from '../store/useAudioStore';
-import { uploadAudio, getWaveform, getSpectrogram, getStreamUrl, listFiles } from '../api/client';
+import { uploadAudio, getWaveform, getSpectrogram, listFiles, deleteFile } from '../api/client';
+import Button from '../components/ui/Button';
 
 export default function Dashboard() {
   const navigate = useNavigate();
-  const { files, addFile, setSelectedFile, setWaveformData, setAnalysis, setSpectrogramData } = useAudioStore();
+  const { files, addFile, setSelectedFile, setWaveformData, setAnalysis, setSpectrogramData, clearFiles } = useAudioStore();
   const [isUploading, setIsUploading] = useState(false);
+  const [isClearing, setIsClearing] = useState(false);
   const [uploadError, setUploadError] = useState<string | null>(null);
+
+  const handleClearSessions = async () => {
+    if (!window.confirm("Are you sure you want to delete all recent sessions? This cannot be undone.")) {
+      return;
+    }
+    
+    setIsClearing(true);
+    try {
+      // Use allSettled so if one file fails to delete, we still clear the rest
+      await Promise.allSettled(files.map(f => deleteFile(f.id)));
+      // Clear local store to update UI instantly without refresh
+      clearFiles();
+    } catch (e) {
+      console.error("Failed to clear sessions", e);
+    } finally {
+      setIsClearing(false);
+    }
+  };
 
   // Load existing files from backend on mount
   useEffect(() => {
@@ -87,7 +107,20 @@ export default function Dashboard() {
       </div>
 
       <div>
-        <h3 className="text-headline-lg font-bold text-on-surface mb-4">Recent Sessions</h3>
+        <div className="flex justify-between items-center mb-4">
+          <h3 className="text-headline-lg font-bold text-on-surface">Recent Sessions</h3>
+          {files.length > 0 && (
+            <Button 
+              variant="destructive" 
+              size="sm" 
+              icon="delete" 
+              loading={isClearing} 
+              onClick={handleClearSessions}
+            >
+              Clear Sessions
+            </Button>
+          )}
+        </div>
         {files.length === 0 ? (
           <div className="text-center p-12 border-2 border-dashed border-surface-container-high rounded-3xl text-on-surface-variant">
             No recent sessions found. Upload an audio file to get started.
