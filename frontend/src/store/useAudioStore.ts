@@ -115,6 +115,7 @@ export const useAudioStore = create<AudioStore>((set) => ({
   setPresets: (p) => set({ presets: p }),
   setActiveTab: (t) => set({ activeTab: t }),
   setVizMode: (m) => set({ vizMode: m }),
+<<<<<<< HEAD
   clearFiles: () => set({
     files: [],
     selectedFile: null,
@@ -127,4 +128,7 @@ export const useAudioStore = create<AudioStore>((set) => ({
     currentTime: 0,
     duration: 0
   }),
+=======
+  clearFiles: () => set({ files: [], selectedFile: null }),
+>>>>>>> 0600f2833f482f4b7a57574171cbb2564297adaa
 }));

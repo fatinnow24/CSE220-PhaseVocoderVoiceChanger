@@ -12,7 +12,6 @@ import UploadZone from '../components/audio/UploadZone';
 import {
   uploadAudio,
   getWaveform,
-  analyzeFile,
   getSpectrogram,
   getStreamUrl,
 } from '../api/client';

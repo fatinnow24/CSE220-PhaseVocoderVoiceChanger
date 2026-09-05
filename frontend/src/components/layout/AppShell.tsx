@@ -12,7 +12,7 @@ export default function AppShell({ children }: AppShellProps) {
     { name: 'Dashboard', path: '/', icon: 'dashboard' },
     { name: 'Studio', path: '/studio', icon: 'science' },
     { name: 'Compare', path: '/compare', icon: 'compare_arrows' },
-    { name: 'Signals', path: '/signals', icon: 'show_chart' },
+    { name: 'Theory', path: '/theory', icon: 'menu_book' },
     { name: 'Effects', path: '/effects', icon: 'auto_fix_high' },
   ];
 

@@ -67,7 +67,6 @@ export default function SpectrogramView() {
 
     // Frequency axis labels
     ctx.scale(dpr, dpr);
-    const w = rect.width;
     const h = rect.height;
     ctx.font = `bold ${Math.round(10 * dpr)}px Manrope, sans-serif`;
     ctx.fillStyle = 'rgba(255,255,255,0.8)';
