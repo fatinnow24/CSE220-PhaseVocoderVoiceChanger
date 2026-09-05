@@ -6,6 +6,7 @@ urlpatterns = [
     path('files/', views.list_files, name='list_files'),
     path('files/<uuid:file_id>/', views.get_file, name='get_file'),
     path('files/<uuid:file_id>/delete/', views.delete_file, name='delete_file'),
+    path('files/delete-all/', views.delete_all_files, name='delete_all_files'),
     path('files/<uuid:file_id>/rename/', views.rename_file, name='rename_file'),
     path('files/<uuid:file_id>/waveform/', views.get_waveform, name='get_waveform'),
     path('files/<uuid:file_id>/fft/', views.get_fft, name='get_fft'),

@@ -478,3 +478,20 @@ def rename_file(request, file_id):
     except Exception as e:
         return _error(str(e))
 
+@api_view(['DELETE'])
+def delete_all_files(request):
+    """Delete all uploaded/processed audio files and their database records."""
+    try:
+        files = AudioFile.objects.all()
+        for af in files:
+            if os.path.exists(af.file_path):
+                try:
+                    os.remove(af.file_path)
+                except Exception:
+                    pass
+        files.delete()
+        return _success()
+    except Exception as e:
+        return _error(str(e))
+
+

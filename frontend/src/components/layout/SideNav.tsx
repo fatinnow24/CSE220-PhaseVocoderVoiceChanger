@@ -1,6 +1,24 @@
-import { NavLink } from 'react-router-dom';
+import { NavLink, useNavigate } from 'react-router-dom';
+import { useAudioStore } from '../../store/useAudioStore';
+import { deleteAllFiles } from '../../api/client';
 
 export default function SideNav() {
+  const navigate = useNavigate();
+  const clearFiles = useAudioStore((state) => state.clearFiles);
+
+  const handleClearSessions = async () => {
+    if (window.confirm('Are you sure you want to remove all recent sessions? This will permanently delete all uploaded and processed audio files.')) {
+      try {
+        await deleteAllFiles();
+        clearFiles();
+        navigate('/');
+      } catch (error) {
+        console.error('Failed to clear sessions:', error);
+        alert('Failed to clear sessions from the server.');
+      }
+    }
+  };
+
   const navItems = [
     { name: 'Dashboard', path: '/', icon: 'dashboard' },
     { name: 'Studio', path: '/studio', icon: 'science' },
@@ -41,6 +59,15 @@ export default function SideNav() {
           </NavLink>
         ))}
       </nav>
+      <div className="mt-auto pt-4 border-t border-surface-container-high">
+        <button
+          onClick={handleClearSessions}
+          className="flex items-center gap-3 w-full px-3 py-2.5 rounded-lg text-error hover:bg-surface-container-highest transition-colors text-left"
+        >
+          <span className="material-symbols-outlined">delete_sweep</span>
+          <span className="font-medium text-body-lg">Clear Sessions</span>
+        </button>
+      </div>
     </aside>
   );
 }

@@ -14,6 +14,7 @@ export const uploadAudio = (file: File) => {
 export const listFiles = () => api.get('/files/');
 export const getFile = (id: string) => api.get(`/files/${id}/`);
 export const deleteFile = (id: string) => api.delete(`/files/${id}/delete/`);
+export const deleteAllFiles = () => api.delete('/files/delete-all/');
 export const renameFile = (id: string, name: string) => api.patch(`/files/${id}/rename/`, { name });
 export const getWaveform = (id: string, points = 1000) => api.get(`/files/${id}/waveform/`, { params: { points } });
 export const getFFT = (id: string) => api.get(`/files/${id}/fft/`);
