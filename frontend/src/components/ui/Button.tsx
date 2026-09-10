@@ -1,13 +1,13 @@
 import { ReactNode, ButtonHTMLAttributes } from 'react';
 
 interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
-  variant?: 'primary' | 'secondary' | 'ghost' | 'destructive';
+  variant?: 'primary' | 'secondary' | 'ghost' | 'destructive' | 'pill';
   size?: 'sm' | 'md' | 'lg';
   icon?: string;
   iconPosition?: 'left' | 'right';
   loading?: boolean;
   fullWidth?: boolean;
-  children: ReactNode;
+  children?: ReactNode;
 }
 
 export default function Button({ 
@@ -22,19 +22,25 @@ export default function Button({
   disabled,
   ...props
 }: ButtonProps) {
-  const base = 'inline-flex items-center justify-center font-medium transition-all active:scale-95 disabled:opacity-50 disabled:active:scale-100 disabled:cursor-not-allowed';
+  const base = 'inline-flex items-center justify-center font-medium transition-all duration-150 active:scale-[0.98] disabled:opacity-40 disabled:active:scale-100 disabled:cursor-not-allowed select-none tracking-tight';
   
   const variants = {
-    primary: 'bg-primary text-on-primary hover:bg-[#3d554f]',
-    secondary: 'bg-secondary-container text-on-secondary-fixed hover:bg-secondary-fixed',
-    ghost: 'bg-transparent text-primary hover:bg-primary-fixed/20',
-    destructive: 'bg-error text-white hover:bg-red-800'
+    // Exact checklist.design dark button: crisp white text with font-semibold (600)
+    primary: 'bg-[#26211c] text-[#ffffff] font-semibold tracking-[-0.01em] hover:bg-[#1a1713] active:bg-[#0f0d0b]',
+    // Exact checklist.design outline/secondary button: rounded-ios-xl, 1px subtle border on cream
+    secondary: 'bg-transparent text-[#26211c] border border-[rgba(38,33,28,0.18)] hover:bg-[rgba(38,33,28,0.04)] active:bg-[rgba(38,33,28,0.08)]',
+    // Clean transparent hover
+    ghost: 'bg-transparent text-ink-secondary hover:text-ink-primary hover:bg-surface-raised active:bg-surface-muted',
+    // Delicate soft error fill
+    destructive: 'bg-error-soft text-error hover:bg-error hover:text-white active:opacity-90',
+    // Pill capsule style
+    pill: 'bg-surface-raised text-ink-primary hover:bg-[#26211c] hover:text-white hover:font-semibold rounded-pill',
   };
   
   const sizes = {
-    sm: 'text-body-sm px-4 py-2 rounded-xl gap-2',
-    md: 'text-body-lg px-6 py-3 rounded-full gap-2',
-    lg: 'text-title-md px-8 py-4 rounded-full gap-3'
+    sm: 'text-[13px] px-4 py-2 rounded-ios-lg gap-2',
+    md: 'text-[14px] px-5 py-2.5 rounded-ios-xl gap-2',
+    lg: 'text-[15px] px-6 py-3 rounded-ios-xl gap-2.5'
   };
 
   return (
@@ -44,15 +50,15 @@ export default function Button({
       {...props}
     >
       {loading ? (
-        <span className="material-symbols-outlined animate-spin">progress_activity</span>
+        <span className="material-symbols-outlined animate-spin text-[18px]">progress_activity</span>
       ) : icon && iconPosition === 'left' ? (
-        <span className="material-symbols-outlined">{icon}</span>
+        <span className="material-symbols-outlined text-[18px]">{icon}</span>
       ) : null}
       
       {children}
       
       {!loading && icon && iconPosition === 'right' && (
-        <span className="material-symbols-outlined">{icon}</span>
+        <span className="material-symbols-outlined text-[18px]">{icon}</span>
       )}
     </button>
   );

@@ -1,12 +1,12 @@
 import { useRef, useEffect, useState } from 'react';
-import Button from '../ui/Button';
 
 interface NativeAudioPlayerProps {
   url: string | null;
   title?: string;
+  className?: string;
 }
 
-export default function NativeAudioPlayer({ url, title }: NativeAudioPlayerProps) {
+export default function NativeAudioPlayer({ url, title, className = '' }: NativeAudioPlayerProps) {
   const audioRef = useRef<HTMLAudioElement>(null);
   const [isPlaying, setIsPlaying] = useState(false);
   const [currentTime, setCurrentTime] = useState(0);
@@ -86,7 +86,7 @@ export default function NativeAudioPlayer({ url, title }: NativeAudioPlayerProps
   const rates = [0.5, 0.75, 1, 1.25, 1.5, 2];
 
   return (
-    <div className="bg-surface-container-lowest rounded-3xl p-4 shadow-card flex flex-col gap-4">
+    <div className={`flex flex-col gap-3 select-none ${className}`}>
       {url && (
         <audio
           ref={audioRef}
@@ -101,72 +101,135 @@ export default function NativeAudioPlayer({ url, title }: NativeAudioPlayerProps
           }}
         />
       )}
-      
-      <div className="flex items-center justify-between px-2">
-        <div className="flex items-center gap-3">
-          <span className="material-symbols-outlined text-primary">audio_file</span>
-          <span className="font-bold text-title-md truncate max-w-[200px] md:max-w-md">{title || 'Unknown Audio'}</span>
-        </div>
-        <div className="text-body-sm font-medium font-mono bg-surface-container-low px-3 py-1 rounded-md select-none">
+
+      <div className={`flex items-center ${title ? 'justify-between' : 'justify-end'} px-0.5`}>
+        {title && (
+          <div className="flex items-center gap-2 min-w-0">
+            <span className="font-semibold text-[13.5px] text-ink-primary truncate max-w-[200px]">
+              {title}
+            </span>
+          </div>
+        )}
+        <div className="text-[12px] font-medium text-ink-secondary tracking-tight">
           {formatTime(currentTime)} / {formatTime(duration)}
         </div>
       </div>
 
-      {/* Draggable seek bar */}
+      {/* Minimalist Seek track */}
       <div
         ref={progressRef}
-        className="h-10 bg-surface-container-low rounded-xl relative cursor-pointer flex items-center px-1 overflow-hidden group select-none"
+        className="h-2 bg-[rgba(38,33,28,0.08)] hover:h-2.5 rounded-pill relative cursor-pointer flex items-center overflow-hidden transition-all duration-150"
         onMouseDown={handleMouseDown}
       >
-        <div className="absolute inset-0 bg-surface-container-high opacity-0 group-hover:opacity-30 transition-opacity rounded-xl" />
         <div
-          className="absolute h-full left-0 top-0 bg-primary/20 rounded-xl"
+          className="absolute h-full left-0 top-0 bg-[#26211c] transition-all duration-75"
           style={{ width: `${progressPct}%` }}
-        />
-        <div
-          className="absolute h-8 w-1.5 bg-primary rounded-full shadow-md z-10"
-          style={{ left: `calc(${progressPct}% - 3px)` }}
         />
       </div>
 
-      <div className="flex flex-wrap items-center justify-between gap-4 px-2">
-        <div className="flex items-center gap-2">
-          <Button variant="ghost" size="sm" icon="replay_10" onClick={() => seek(Math.max(0, currentTime - 10))}> </Button>
-          <Button
-            variant="primary"
-            size="lg"
-            icon={isPlaying ? 'pause' : 'play_arrow'}
+      {/* Single-line Controls Row: Play controls, volume, and speed all together */}
+      <div className="flex items-center justify-between gap-2 px-0.5 pt-0.5 flex-nowrap">
+        {/* Playback Controls */}
+        <div className="flex items-center gap-0.5 shrink-0">
+          {/* Skip Back 10s */}
+          <button
+            onClick={() => seek(Math.max(0, currentTime - 10))}
+            className="w-7 h-7 rounded-ios-md flex items-center justify-center text-ink-primary/70 hover:text-ink-primary hover:bg-[rgba(38,33,28,0.06)] active:scale-[0.95] transition-all cursor-pointer"
+            title="Rewind 10s"
+          >
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M11 17l-5-5 5-5M18 17l-5-5 5-5" />
+            </svg>
+          </button>
+
+          {/* Bordered Play/Pause */}
+          <button
             onClick={togglePlay}
-            className="w-14 h-14 !p-0 !rounded-full shadow-active"
-          > </Button>
-          <Button variant="ghost" size="sm" icon="forward_10" onClick={() => seek(Math.min(duration, currentTime + 10))}> </Button>
-          <Button variant="ghost" size="sm" icon="stop" onClick={stop}> </Button>
+            className="w-8 h-8 rounded-ios-md flex items-center justify-center text-ink-primary hover:bg-[rgba(38,33,28,0.06)] active:scale-[0.92] transition-all cursor-pointer select-none"
+            title={isPlaying ? 'Pause' : 'Play'}
+          >
+            {isPlaying ? (
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
+                <line x1="8" y1="5" x2="8" y2="19" />
+                <line x1="16" y1="5" x2="16" y2="19" />
+              </svg>
+            ) : (
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="translate-x-[1px]">
+                <polygon points="6 4 20 12 6 20 6 4" />
+              </svg>
+            )}
+          </button>
+
+          {/* Skip Forward 10s */}
+          <button
+            onClick={() => seek(Math.min(duration, currentTime + 10))}
+            className="w-7 h-7 rounded-ios-md flex items-center justify-center text-ink-primary/70 hover:text-ink-primary hover:bg-[rgba(38,33,28,0.06)] active:scale-[0.95] transition-all cursor-pointer"
+            title="Forward 10s"
+          >
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M13 17l5-5-5-5M6 17l5-5-5-5" />
+            </svg>
+          </button>
+
+          {/* Stop */}
+          <button
+            onClick={stop}
+            className="w-7 h-7 rounded-ios-md flex items-center justify-center text-ink-primary/80 hover:text-ink-primary hover:bg-[rgba(38,33,28,0.06)] active:scale-[0.95] transition-all cursor-pointer"
+            title="Stop"
+          >
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <rect x="4.5" y="4.5" width="15" height="15" rx="3" />
+            </svg>
+          </button>
         </div>
 
-        <div className="flex items-center gap-6">
-          <div className="flex items-center gap-2 group">
-            <span className="material-symbols-outlined text-on-surface-variant cursor-pointer" onClick={() => setVolume(volume > 0 ? 0 : 1)}>
-              {volume === 0 ? 'volume_off' : volume < 0.5 ? 'volume_down' : 'volume_up'}
-            </span>
-            <input
-              type="range"
-              min="0" max="1" step="0.01"
-              value={volume}
-              onChange={(e) => setVolume(parseFloat(e.target.value))}
-              className="w-24 opacity-70 group-hover:opacity-100 transition-opacity"
-            />
-          </div>
+        {/* Volume Slider right after play controls */}
+        <div className="flex items-center gap-1 shrink-0">
+          <button 
+            type="button"
+            className="w-6 h-6 rounded-ios-md flex items-center justify-center text-ink-primary/70 hover:text-ink-primary hover:bg-[rgba(38,33,28,0.06)] active:scale-[0.95] cursor-pointer transition-all shrink-0"
+            onClick={() => setVolume(volume > 0 ? 0 : 1)}
+            title={volume === 0 ? "Unmute" : "Mute"}
+          >
+            {volume === 0 ? (
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="shrink-0">
+                <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5" />
+                <line x1="23" y1="9" x2="17" y2="15" />
+                <line x1="17" y1="9" x2="23" y2="15" />
+              </svg>
+            ) : (
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="shrink-0">
+                <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5" />
+                <path d="M15.54 8.46a5 5 0 0 1 0 7.07" />
+                {volume > 0.5 && <path d="M19.07 4.93a10 10 0 0 1 0 14.14" />}
+              </svg>
+            )}
+          </button>
+          <input
+            type="range"
+            min="0" max="1" step="0.01"
+            value={volume}
+            style={{
+              background: `linear-gradient(to right, #1f2328 0%, #1f2328 ${volume * 100}%, #e4e2dc ${volume * 100}%, #e4e2dc 100%)`
+            }}
+            onChange={(e) => setVolume(parseFloat(e.target.value))}
+            className="w-16 cursor-pointer"
+          />
+        </div>
 
-          <div className="flex items-center gap-1 bg-surface-container-low p-1 rounded-xl">
-            <span className="material-symbols-outlined text-[18px] px-1 text-on-surface-variant">speed</span>
-            <select
-              className="bg-transparent text-body-sm font-medium outline-none cursor-pointer pr-1"
-              value={playbackRate}
-              onChange={(e) => setPlaybackRate(parseFloat(e.target.value))}
-            >
-              {rates.map(r => <option key={r} value={r}>{r}x</option>)}
-            </select>
-          </div>
+        {/* Speed Selector on same line */}
+        <div className="flex items-center shrink-0">
+          <select
+            value={playbackRate}
+            onChange={(e) => setPlaybackRate(parseFloat(e.target.value))}
+            className="bg-transparent text-[11.5px] font-semibold text-ink-primary/80 hover:text-ink-primary cursor-pointer select-none outline-none py-0.5 px-1"
+          >
+            {rates.map(r => (
+              <option key={r} value={r}>
+                {r}x
+              </option>
+            ))}
+          </select>
         </div>
       </div>
     </div>

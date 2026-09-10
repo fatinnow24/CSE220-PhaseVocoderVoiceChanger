@@ -7,16 +7,16 @@ export default function ProgressBar({ progress, label }: ProgressBarProps) {
   return (
     <div className="w-full">
       {label && (
-        <div className="flex justify-between items-center mb-2">
-          <span className="text-body-sm font-medium text-on-surface-variant">{label}</span>
-          <span className="text-label-caps font-bold text-primary">{Math.round(progress)}%</span>
+        <div className="flex justify-between items-center mb-1.5">
+          <span className="text-[12px] font-medium text-ink-secondary">{label}</span>
+          <span className="text-[11px]  font-medium text-ink-primary">{Math.round(progress)}%</span>
         </div>
       )}
-      <div className="w-full h-2 bg-surface-container-high rounded-full overflow-hidden">
+      <div className="w-full h-1.5 bg-surface-raised rounded-pill overflow-hidden">
         <div 
-          className="h-full bg-primary transition-all duration-300 ease-out"
+          className="h-full bg-lavender-ink/80 rounded-pill transition-all duration-300 ease-out"
           style={{ width: `${Math.max(0, Math.min(100, progress))}%` }}
-        ></div>
+        />
       </div>
     </div>
   );

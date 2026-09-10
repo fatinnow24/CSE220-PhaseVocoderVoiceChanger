@@ -402,7 +402,17 @@ def generate_signal(request):
         else:
             return _error('Unknown type')
             
-        af = _save_new_audio(sig, sr, f"gen_{sig_type}.wav", 'generated', params=data)
+        # Determine filename (custom or auto-generated)
+        custom_name = data.get('name') or params.get('name', '').strip()
+        if custom_name:
+            if not custom_name.lower().endswith('.wav'):
+                custom_name += '.wav'
+            filename = custom_name
+        else:
+            freq_str = f"_{int(params.get('frequency', 440))}Hz" if sig_type not in ('white_noise', 'impulse', 'chirp') else ""
+            filename = f"gen_{sig_type}{freq_str}_{int(duration)}s.wav"
+
+        af = _save_new_audio(sig, sr, filename, 'generated', params=data)
         return _success(AudioFileSerializer(af).data)
     except Exception as e:
         return _error(str(e))

@@ -1,12 +1,6 @@
-/**
- * AudioPlayer — uses the singleton useAudioEngine (shared AudioContext + AnalyserNode)
- * so there is only ever ONE AudioContext in the app. This eliminates conflicts with
- * AnimatedSignalGraph and SpectrumAnalyzer which also read the same AnalyserNode.
- */
-import { useRef, useEffect } from 'react';
+import { useRef, useEffect, useState } from 'react';
 import { useAudioEngine } from '../../hooks/useAudioEngine';
 import { useAudioStore } from '../../store/useAudioStore';
-import Button from '../ui/Button';
 
 interface AudioPlayerProps {
   url: string | null;
@@ -20,6 +14,8 @@ export default function AudioPlayer({ url, title }: AudioPlayerProps) {
     volume, playbackRate,
     setVolume, setPlaybackRate,
   } = useAudioStore();
+  const [showRateMenu, setShowRateMenu] = useState(false);
+  const rateMenuRef = useRef<HTMLDivElement>(null);
   const progressRef = useRef<HTMLDivElement>(null);
   const isDraggingRef = useRef(false);
 
@@ -65,75 +61,171 @@ export default function AudioPlayer({ url, title }: AudioPlayerProps) {
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, [isPlaying, currentTime, duration, volume, play, pause, seek, setVolume]);
 
+  useEffect(() => {
+    const handleClickOutside = (e: MouseEvent) => {
+      if (rateMenuRef.current && !rateMenuRef.current.contains(e.target as Node)) {
+        setShowRateMenu(false);
+      }
+    };
+    if (showRateMenu) {
+      document.addEventListener('mousedown', handleClickOutside);
+    }
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, [showRateMenu]);
+
   const progressPct = duration > 0 ? (currentTime / duration) * 100 : 0;
   const rates = [0.5, 0.75, 1, 1.25, 1.5, 2];
 
   return (
-    <div className="bg-surface-container-lowest rounded-3xl p-4 shadow-card flex flex-col gap-4">
-      <div className="flex items-center justify-between px-2">
-        <div className="flex items-center gap-3">
-          <span className="material-symbols-outlined text-primary">audio_file</span>
-          <span className="font-bold text-title-md truncate max-w-[200px] md:max-w-md">{title || 'Unknown Audio'}</span>
+    <div className="bg-surface rounded-ios-2xl p-4 md:p-5 flex flex-col gap-3.5 select-none">
+      <div className="flex items-center justify-between px-1">
+        <div className="flex items-center gap-2 min-w-0">
+          <span className="font-semibold text-[14px] text-ink-primary truncate max-w-[220px] md:max-w-md">
+            {title || 'Current Audio'}
+          </span>
         </div>
-        <div className="text-body-sm font-medium font-mono bg-surface-container-low px-3 py-1 rounded-md select-none">
+        <div className="text-[12px] font-medium text-ink-secondary tracking-tight">
           {formatTime(currentTime)} / {formatTime(duration)}
         </div>
       </div>
 
-      {/* Draggable seek bar */}
+      {/* Minimalist Seek track */}
       <div
         ref={progressRef}
-        className="h-10 bg-surface-container-low rounded-xl relative cursor-pointer flex items-center px-1 overflow-hidden group select-none"
+        className="h-2 bg-[rgba(38,33,28,0.08)] hover:h-3 rounded-pill relative cursor-pointer flex items-center overflow-hidden transition-all duration-150"
         onMouseDown={handleMouseDown}
       >
-        <div className="absolute inset-0 bg-surface-container-high opacity-0 group-hover:opacity-30 transition-opacity rounded-xl" />
         <div
-          className="absolute h-full left-0 top-0 bg-primary/20 rounded-xl"
+          className="absolute h-full left-0 top-0 bg-[#26211c] transition-all duration-75"
           style={{ width: `${progressPct}%` }}
-        />
-        <div
-          className="absolute h-8 w-1.5 bg-primary rounded-full shadow-md z-10"
-          style={{ left: `calc(${progressPct}% - 3px)` }}
         />
       </div>
 
-      <div className="flex flex-wrap items-center justify-between gap-4 px-2">
-        <div className="flex items-center gap-2">
-          <Button variant="ghost" size="sm" icon="replay_10" onClick={() => seek(Math.max(0, currentTime - 10))}> </Button>
-          <Button
-            variant="primary"
-            size="lg"
-            icon={isPlaying ? 'pause' : 'play_arrow'}
+      {/* Control Buttons & Sliders */}
+      <div className="flex flex-wrap items-center justify-between gap-3 px-1 pt-1">
+        <div className="flex items-center gap-1">
+          {/* Custom Skip Back 10s */}
+          <button
+            onClick={() => seek(Math.max(0, currentTime - 10))}
+            className="w-8 h-8 rounded-ios-md flex items-center justify-center text-ink-primary/70 hover:text-ink-primary hover:bg-[rgba(38,33,28,0.06)] active:scale-[0.95] transition-all cursor-pointer"
+            title="Rewind 10s"
+          >
+            <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M11 17l-5-5 5-5M18 17l-5-5 5-5" />
+            </svg>
+          </button>
+
+          {/* Bordered Play/Pause with Rounded Corners */}
+          <button
             onClick={isPlaying ? pause : play}
-            className="w-14 h-14 !p-0 !rounded-full shadow-active"
-          > </Button>
-          <Button variant="ghost" size="sm" icon="forward_10" onClick={() => seek(Math.min(duration, currentTime + 10))}> </Button>
-          <Button variant="ghost" size="sm" icon="stop" onClick={stop}> </Button>
+            className="w-9 h-9 rounded-ios-md flex items-center justify-center text-ink-primary hover:bg-[rgba(38,33,28,0.06)] active:scale-[0.92] transition-all cursor-pointer select-none"
+            title={isPlaying ? 'Pause' : 'Play'}
+          >
+            {isPlaying ? (
+              <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
+                <line x1="8" y1="5" x2="8" y2="19" />
+                <line x1="16" y1="5" x2="16" y2="19" />
+              </svg>
+            ) : (
+              <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="translate-x-[1px]">
+                <polygon points="6 4 20 12 6 20 6 4" />
+              </svg>
+            )}
+          </button>
+
+          {/* Custom Skip Forward 10s */}
+          <button
+            onClick={() => seek(Math.min(duration, currentTime + 10))}
+            className="w-8 h-8 rounded-ios-md flex items-center justify-center text-ink-primary/70 hover:text-ink-primary hover:bg-[rgba(38,33,28,0.06)] active:scale-[0.95] transition-all cursor-pointer"
+            title="Forward 10s"
+          >
+            <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M13 17l5-5-5-5M6 17l5-5-5-5" />
+            </svg>
+          </button>
+
+          {/* Bordered Stop with Rounded Corners */}
+          <button
+            onClick={stop}
+            className="w-8 h-8 rounded-ios-md flex items-center justify-center text-ink-primary/80 hover:text-ink-primary hover:bg-[rgba(38,33,28,0.06)] active:scale-[0.95] transition-all cursor-pointer"
+            title="Stop"
+          >
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <rect x="4.5" y="4.5" width="15" height="15" rx="3" />
+            </svg>
+          </button>
         </div>
 
-        <div className="flex items-center gap-6">
-          <div className="flex items-center gap-2 group">
-            <span className="material-symbols-outlined text-on-surface-variant cursor-pointer" onClick={() => setVolume(volume > 0 ? 0 : 1)}>
-              {volume === 0 ? 'volume_off' : volume < 0.5 ? 'volume_down' : 'volume_up'}
-            </span>
+        <div className="flex items-center gap-3">
+          <div className="flex items-center gap-1.5">
+            <button 
+              type="button"
+              className="w-7 h-7 rounded-ios-md flex items-center justify-center text-ink-primary/70 hover:text-ink-primary hover:bg-[rgba(38,33,28,0.06)] active:scale-[0.95] cursor-pointer transition-all shrink-0"
+              onClick={() => setVolume(volume > 0 ? 0 : 1)}
+              title={volume === 0 ? "Unmute" : "Mute"}
+            >
+              {volume === 0 ? (
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="shrink-0">
+                  <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5" />
+                  <line x1="23" y1="9" x2="17" y2="15" />
+                  <line x1="17" y1="9" x2="23" y2="15" />
+                </svg>
+              ) : (
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="shrink-0">
+                  <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5" />
+                  <path d="M15.54 8.46a5 5 0 0 1 0 7.07" />
+                  {volume > 0.5 && <path d="M19.07 4.93a10 10 0 0 1 0 14.14" />}
+                </svg>
+              )}
+            </button>
             <input
               type="range"
               min="0" max="1" step="0.01"
               value={volume}
+              style={{
+                background: `linear-gradient(to right, #1f2328 0%, #1f2328 ${volume * 100}%, #e4e2dc ${volume * 100}%, #e4e2dc 100%)`
+              }}
               onChange={(e) => setVolume(parseFloat(e.target.value))}
-              className="w-24 opacity-70 group-hover:opacity-100 transition-opacity"
+              className="w-20 cursor-pointer"
             />
           </div>
 
-          <div className="flex items-center gap-1 bg-surface-container-low p-1 rounded-xl">
-            <span className="material-symbols-outlined text-[18px] px-1 text-on-surface-variant">speed</span>
-            <select
-              className="bg-transparent text-body-sm font-medium outline-none cursor-pointer pr-1"
-              value={playbackRate}
-              onChange={(e) => setPlaybackRate(parseFloat(e.target.value))}
+          <div className="relative flex items-center ml-auto justify-end" ref={rateMenuRef}>
+            <button
+              type="button"
+              onClick={() => setShowRateMenu(!showRateMenu)}
+              className="text-[12px] font-medium text-ink-primary/70 hover:text-ink-primary cursor-pointer select-none transition-colors py-0.5 px-1"
+              title="Playback Speed"
             >
-              {rates.map(r => <option key={r} value={r}>{r}x</option>)}
-            </select>
+              {playbackRate}x
+            </button>
+
+            {showRateMenu && (
+              <div className="absolute bottom-full right-0 mb-2 py-1 bg-surface-raised border border-[rgba(38,33,28,0.12)] rounded-ios-lg shadow-ios-md flex flex-col z-30 min-w-[70px] animate-fadeIn">
+                {rates.map(r => {
+                  const isSelected = r === playbackRate;
+                  return (
+                    <button
+                      key={r}
+                      type="button"
+                      onClick={() => {
+                        setPlaybackRate(r);
+                        setShowRateMenu(false);
+                      }}
+                      className={`text-[12px] px-3 py-1.5 text-right cursor-pointer transition-colors ${
+                        isSelected
+                          ? 'font-semibold text-ink-primary bg-[rgba(38,33,28,0.06)]'
+                          : 'font-normal text-ink-secondary hover:text-ink-primary hover:bg-[rgba(38,33,28,0.04)]'
+                      }`}
+                    >
+                      {r}x
+                    </button>
+                  );
+                })}
+              </div>
+            )}
           </div>
         </div>
       </div>

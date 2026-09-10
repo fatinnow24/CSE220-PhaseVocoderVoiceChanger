@@ -7,15 +7,15 @@ interface BadgeProps {
 
 export default function Badge({ children, variant = 'neutral' }: BadgeProps) {
   const variants = {
-    primary: 'bg-primary-container text-on-primary-container',
-    secondary: 'bg-secondary-container text-on-secondary-fixed',
-    neutral: 'bg-surface-container-high text-on-surface-variant',
-    success: 'bg-green-100 text-green-800',
-    warning: 'bg-yellow-100 text-yellow-800',
+    primary: 'bg-lavender text-ink-primary',
+    secondary: 'bg-pastel-blue text-ink-primary',
+    neutral: 'bg-surface-raised text-ink-secondary',
+    success: 'bg-pastel-green text-ink-primary',
+    warning: 'bg-pastel-peach text-ink-primary',
   };
 
   return (
-    <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-label-caps font-medium ${variants[variant]}`}>
+    <span className={`inline-flex items-center px-2.5 py-0.5 rounded-pill text-[11px] font-medium tracking-tight ${variants[variant]}`}>
       {children}
     </span>
   );

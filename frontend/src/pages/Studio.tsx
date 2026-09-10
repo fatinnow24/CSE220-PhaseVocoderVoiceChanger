@@ -1,33 +1,58 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { useAudioStore } from '../store/useAudioStore';
 import AudioPlayer from '../components/audio/AudioPlayer';
-import WaveformViewer from '../components/audio/WaveformViewer';
-import AnimatedSignalGraph from '../components/visualization/AnimatedSignalGraph';
-import ProcessingControls from '../components/processing/ProcessingControls';
-import SpectrumAnalyzer from '../components/visualization/SpectrumAnalyzer';
-import AudioAnalysisPanel from '../components/analysis/AudioAnalysisPanel';
-import SpectrogramView from '../components/visualization/SpectrogramView';
-import EffectChain from '../components/processing/EffectChain';
+import { StudioWaveform, StudioLiveSignal, StudioLiveSpectrum } from '../components/studio/StudioVisualizers';
+import StudioProcessingPanel from '../components/studio/StudioProcessingPanel';
+import StudioEffectsChain from '../components/studio/StudioEffectsChain';
+import { StudioAnalysisMetrics, StudioSpectrogramCard } from '../components/studio/StudioAnalysisCards';
 import UploadZone from '../components/audio/UploadZone';
+import Button from '../components/ui/Button';
 import {
   uploadAudio,
   getWaveform,
   getSpectrogram,
+  analyzeFile,
   getStreamUrl,
+  getExportUrl,
 } from '../api/client';
 
 export default function Studio() {
+  const navigate = useNavigate();
   const {
     selectedFile,
     setSelectedFile,
     addFile,
+    waveformData,
     setWaveformData,
+    analysis,
     setAnalysis,
+    spectrogramData,
     setSpectrogramData,
   } = useAudioStore();
 
   const [isUploading, setIsUploading] = useState(false);
   const [uploadError, setUploadError] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (selectedFile) {
+      if (!waveformData) {
+        getWaveform(selectedFile.id, 1200)
+          .then((res) => setWaveformData(res.data.data))
+          .catch(() => {});
+      }
+      if (!spectrogramData) {
+        getSpectrogram(selectedFile.id)
+          .then((res) => setSpectrogramData(res.data.data))
+          .catch(() => {});
+      }
+      if (!analysis) {
+        analyzeFile(selectedFile.id)
+          .then((res) => setAnalysis(res.data.data))
+          .catch(() => {});
+      }
+    }
+  }, [selectedFile?.id]);
 
   const handleFileSelect = async (file: File) => {
     setIsUploading(true);
@@ -35,27 +60,23 @@ export default function Studio() {
     try {
       const res = await uploadAudio(file);
       const { data } = res.data;
-      // data contains AudioFile fields plus an analysis field from the backend
       const af = data;
       addFile(af);
       setSelectedFile(af);
 
-      // Store initial analysis returned alongside the upload
       if (data.analysis) {
         setAnalysis(data.analysis);
       }
 
-      // Load waveform data for the WaveformViewer
       try {
         const wRes = await getWaveform(af.id, 1200);
         setWaveformData(wRes.data.data);
-      } catch { /* non-fatal */ }
+      } catch {}
 
-      // Load spectrogram in background
       try {
         const sRes = await getSpectrogram(af.id);
         setSpectrogramData(sRes.data.data);
-      } catch { /* non-fatal */ }
+      } catch {}
     } catch (e: any) {
       const msg = e?.response?.data?.error || e?.message || 'Upload failed';
       setUploadError(msg);
@@ -66,63 +87,85 @@ export default function Studio() {
 
   if (!selectedFile) {
     return (
-      <div className="max-w-4xl mx-auto mt-12 animate-in fade-in duration-500">
-        <h1 className="text-display font-bold text-on-surface mb-8 text-center">Studio Workspace</h1>
+      <div className="max-w-2xl mx-auto mt-8 animate-in fade-in duration-300 space-y-4">
+        <div className="text-center space-y-1 mb-6">
+          <h1 className="text-[26px] font-semibold text-ink-primary">Select Audio File</h1>
+          <p className="text-[13px] text-ink-secondary">Upload an audio recording to adjust pitch, time-scale, and inspect spectral domains.</p>
+        </div>
         <UploadZone
           onFileSelect={handleFileSelect}
           isUploading={isUploading}
         />
         {uploadError && (
-          <p className="text-center text-error mt-4 text-body-sm">{uploadError}</p>
+          <p className="text-center text-error text-[12px]">{uploadError}</p>
         )}
       </div>
     );
   }
 
-  // Use the backend streaming endpoint for playback (not the raw disk path)
   const streamUrl = getStreamUrl(selectedFile.id);
 
   return (
-    <div className="space-y-6 max-w-7xl mx-auto animate-in fade-in duration-500">
+    <div className="space-y-4 max-w-6xl mx-auto animate-in fade-in duration-300">
+      {/* Top action header */}
       <div className="flex items-center justify-between">
-        <h1 className="text-headline-lg font-bold text-on-surface">Studio</h1>
-        <button
-          onClick={() => {
-            setSelectedFile(null);
-            setWaveformData(null);
-            setAnalysis(null);
-            setSpectrogramData(null);
-          }}
-          className="text-body-sm font-medium text-error hover:underline"
-        >
-          Close File
-        </button>
+        <h1 className="text-[20px] font-semibold text-ink-primary">Studio Workspace</h1>
+        <div className="flex items-center gap-2">
+          <Button
+            variant="secondary"
+            size="sm"
+            icon="compare_arrows"
+            onClick={() => navigate('/compare')}
+            title="Compare Phase Vocoder vs Naive Resampling"
+          >
+            Compare
+          </Button>
+          <a
+            href={getExportUrl(selectedFile.id)}
+            download={selectedFile.original_filename}
+            className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-ios-lg text-[13px] font-medium border border-[rgba(38,33,28,0.18)] text-[#26211c] hover:bg-[rgba(38,33,28,0.04)] active:scale-[0.98] transition-all"
+            title="Download active processed WAV file"
+          >
+            <span className="material-symbols-outlined text-[16px]">download</span>
+            <span>Download WAV</span>
+          </a>
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={() => {
+              setSelectedFile(null);
+              setWaveformData(null);
+              setAnalysis(null);
+              setSpectrogramData(null);
+            }}
+          >
+            Close Audio
+          </Button>
+        </div>
       </div>
 
+      {/* Main player */}
       <AudioPlayer url={streamUrl} title={selectedFile.original_filename} />
 
-      <WaveformViewer />
-
-      <AnimatedSignalGraph />
-
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
-        <div className="lg:col-span-5">
-          <ProcessingControls />
-        </div>
-        <div className="lg:col-span-4">
-          <SpectrumAnalyzer />
-        </div>
-        <div className="lg:col-span-3">
-          <AudioAnalysisPanel />
-        </div>
+      {/* Row 1: Direct Bento Visualizers in Checklist Soft Color Variants */}
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <StudioWaveform />
+        <StudioLiveSignal />
+        <StudioLiveSpectrum />
       </div>
 
-      <div className="grid grid-cols-1 xl:grid-cols-2 gap-6">
-        <SpectrogramView />
-        <EffectChain />
+      {/* Row 2: 2-Column Processing and Deep Analysis Bento Cards */}
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-4 items-start">
+        <div className="lg:col-span-7 space-y-4">
+          <StudioProcessingPanel />
+          <StudioEffectsChain />
+        </div>
+
+        <div className="lg:col-span-5 space-y-4">
+          <StudioAnalysisMetrics />
+          <StudioSpectrogramCard />
+        </div>
       </div>
     </div>
   );
 }
-
-

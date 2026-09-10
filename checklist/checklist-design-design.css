@@ -1,0 +1,40 @@
+@theme {
+  /* Colors */
+  --color-background-cream: #f4f3ee;
+  --color-dark-text: #26211c;
+  --color-pure-black: #000000;
+  --color-white-surface: #ffffff;
+  --color-purple-primary: #684d95;
+  --color-secondary-text: #57534e;
+  --color-category-mobile: #f0ead8;
+  --color-category-web-app: #dce6f0;
+  --color-category-pages: #e5e3e8;
+  --color-category-components: #f0e3db;
+  --color-category-flows: #e3e8e4;
+  --color-border-subtle: #6b7280;
+
+  /* Spacing */
+  --spacing-space-1: 4px;
+  --spacing-space-2: 8px;
+  --spacing-space-3: 12px;
+  --spacing-space-4: 16px;
+  --spacing-space-6: 24px;
+  --spacing-space-10: 40px;
+  --spacing-space-16: 64px;
+  --spacing-space-20: 80px;
+  --spacing-space-24: 96px;
+
+  /* Border Radius */
+  --radius-radius-sm: 8px;
+  --radius-radius-md: 12px;
+  --radius-radius-lg: 24px;
+  --radius-radius-2xl: 16px;
+  --radius-radius-3xl: 24px;
+  --radius-radius-pill: 9999px;
+
+  /* Fonts */
+  --font-tt-hoves: "TT Hoves", sans-serif;
+  --font-relative-book: "Relative Book", sans-serif;
+  --font-ui-monospace: "ui-monospace", sans-serif;
+
+}

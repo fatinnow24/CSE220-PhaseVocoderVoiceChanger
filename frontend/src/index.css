@@ -1,4 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700&display=swap');
 @import url('https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200&display=swap');
 
 @tailwind base;
@@ -6,109 +6,139 @@
 @tailwind utilities;
 
 :root {
-  --primary: #49645d;
-  --on-primary: #ffffff;
-  --primary-container: #a7c4bc;
-  --on-primary-container: #37524c;
-  --primary-fixed: #cbe9e0;
-  --primary-fixed-dim: #afcdc5;
-  --secondary: #396477;
-  --on-secondary: #ffffff;
-  --secondary-container: #bae6fd;
-  --secondary-fixed: #bee9ff;
-  --secondary-fixed-dim: #a1cde3;
-  --on-secondary-fixed: #001f2a;
-  --on-secondary-fixed-variant: #1e4c5f;
-  --background: #f9f9ff;
-  --surface: #f9f9ff;
-  --surface-dim: #cfdaf2;
-  --surface-bright: #f9f9ff;
-  --surface-container-lowest: #ffffff;
-  --surface-container-low: #f0f3ff;
-  --surface-container: #e7eeff;
-  --surface-container-high: #dee8ff;
-  --surface-container-highest: #d8e3fb;
-  --on-surface: #111c2d;
-  --on-surface-variant: #414846;
-  --outline: #727976;
-  --outline-variant: #c1c8c5;
-  --error: #ba1a1a;
-  
-  --shadow-card: 0px 10px 30px rgba(0,0,0,0.04);
-  --shadow-active: 0px 20px 40px rgba(167,196,188,0.15);
-  --shadow-inset-soft: inset 0 2px 4px rgba(0,0,0,0.02);
-}
+  /* Warm neutral checklist palette */
+  --bg-cream: #f4f3ee;
+  --bg-surface: #faf9f6;
+  --bg-surface-raised: #f0eee8;
+  --bg-surface-muted: #ebe8e1;
 
-.dark {
-  --primary: #a7c4bc; 
-  --on-primary: #19352e;
-  --primary-container: #314b45;
-  --on-primary-container: #c3e0d8;
-  --primary-fixed: #cbe9e0;
-  --primary-fixed-dim: #afcdc5;
-  
-  --secondary: #a1cde3;
-  --on-secondary: #053547;
-  --secondary-container: #214c5f;
-  --secondary-fixed: #bee9ff;
-  --secondary-fixed-dim: #a1cde3;
-  --on-secondary-fixed: #001f2a;
-  --on-secondary-fixed-variant: #bce9ff;
-  
-  --background: #0f1416;
-  --surface: #0f1416;
-  --surface-dim: #0d1214;
-  --surface-bright: #353a3c;
-  
-  --surface-container-lowest: #141a1c;
-  --surface-container-low: #1b2124;
-  --surface-container: #21272a;
-  --surface-container-high: #282f32;
-  --surface-container-highest: #2f3639;
-  
-  --on-surface: #dfe3e5;
-  --on-surface-variant: #bec8cb;
-  
-  --outline: #899396;
-  --outline-variant: #3f484b;
-  --error: #ffb4ab;
-  
-  --shadow-card: 0px 10px 30px rgba(0,0,0,0.4);
-  --shadow-active: 0px 20px 40px rgba(167,196,188,0.08);
-  --shadow-inset-soft: inset 0 2px 4px rgba(0,0,0,0.2);
+  /* Neutral clean dark slate/charcoal text — no brown tint, no harsh pure black */
+  --ink-primary: #1f2328;
+  --ink-secondary: #59636e;
+  --ink-tertiary: #8c959f;
+
+  /* Neutral Slider tones */
+  --slider-fill: #4b5563;
+  --slider-track: #e5e7eb;
+
+  --accent-lavender: #e4def2;
+  --accent-lavender-hover: #dcd4ee;
+  --accent-lavender-active: #d0c4e7;
+  --accent-lavender-ink: #1f2328;
+  --accent-soft: rgba(228, 222, 242, 0.45);
+
+  /* Checklist Category Pastels */
+  --cat-cream: #f0ead8;
+  --cat-blue: #dce6f0;
+  --cat-lavender: #e5e3e8;
+  --cat-peach: #f0e3db;
+  --cat-green: #e3e8e4;
+
+  /* Functional */
+  --error: #b94a48;
+  --error-soft: #fae8e8;
+  --success: #3f7856;
+  --success-soft: #e5f0ea;
+
+  /* Subtle border token */
+  --hairline: rgba(31, 35, 40, 0.08);
 }
 
 body {
-  font-family: 'Manrope', sans-serif;
-  background-color: var(--background);
-  color: var(--on-surface);
+  font-family: 'Outfit', -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'SF Pro Text', sans-serif;
+  background-color: var(--bg-cream);
+  color: var(--ink-primary);
   -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  letter-spacing: -0.01em;
 }
 
+/* Material Symbols alignment */
 .material-symbols-outlined {
-  font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+  font-variation-settings: 'FILL' 0, 'wght' 450, 'GRAD' 0, 'opsz' 22;
+  display: inline-block;
+  vertical-align: middle;
+  line-height: 1;
 }
-.icon-fill { font-variation-settings: 'FILL' 1, 'wght' 400, 'GRAD' 0, 'opsz' 24; }
+.icon-fill {
+  font-variation-settings: 'FILL' 1, 'wght' 450, 'GRAD' 0, 'opsz' 22;
+}
 
-/* Custom range input */
-input[type=range] { -webkit-appearance: none; width: 100%; background: transparent; }
+/* Smooth iOS-like scrollbars */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+::-webkit-scrollbar-thumb {
+  background: rgba(89, 99, 110, 0.2);
+  border-radius: 9999px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(89, 99, 110, 0.35);
+}
+
+/* Minimalist Range Slider — Clean neutral dark slider track & thumb */
+input[type=range] {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 100%;
+  height: 4px;
+  border-radius: 9999px;
+  cursor: pointer;
+  background: transparent;
+}
+input[type=range]:focus {
+  outline: none;
+}
+
+/* WebKit (Chrome, Safari, Edge) */
 input[type=range]::-webkit-slider-thumb {
-  -webkit-appearance: none; height: 22px; width: 22px;
-  border-radius: 50%; background: var(--primary); box-shadow: 0 2px 8px rgba(0,0,0,0.2);
-  cursor: pointer; margin-top: -7px;
+  -webkit-appearance: none;
+  appearance: none;
+  height: 14px !important;
+  width: 3px !important;
+  border-radius: 1.5px !important;
+  background: #1f2328 !important;
+  border: none !important;
+  cursor: pointer;
+  margin-top: 0px !important;
+  box-shadow: none !important;
 }
+
+/* Firefox */
+input[type=range]::-moz-range-thumb {
+  height: 14px !important;
+  width: 3px !important;
+  border-radius: 1.5px !important;
+  background: #1f2328 !important;
+  border: none !important;
+  cursor: pointer;
+  box-shadow: none !important;
+}
+
 input[type=range]::-webkit-slider-runnable-track {
-  width: 100%; height: 8px; cursor: pointer;
-  background: var(--surface-container-highest); border-radius: 9999px;
-  box-shadow: inset 0 1px 3px rgba(0,0,0,0.05);
+  width: 100%;
+  height: 4px;
+  cursor: pointer;
+  border-radius: 9999px;
+  border: none;
+  background: transparent;
 }
-input[type=range]:focus { outline: none; }
 
-/* Scrollbar */
-::-webkit-scrollbar { width: 6px; height: 6px; }
-::-webkit-scrollbar-track { background: transparent; }
-::-webkit-scrollbar-thumb { background: var(--surface-container-highest); border-radius: 9999px; }
-::-webkit-scrollbar-thumb:hover { background: var(--outline-variant); }
+input[type=range]::-moz-range-track {
+  width: 100%;
+  height: 4px;
+  cursor: pointer;
+  border-radius: 9999px;
+  border: none;
+  background: transparent;
+}
 
-/* Canvas containers */
-.canvas-viz { display: block; width: 100%; }
+/* Canvas crisp rendering */
+canvas {
+  image-rendering: -webkit-optimize-contrast;
+  image-rendering: crisp-edges;
+}

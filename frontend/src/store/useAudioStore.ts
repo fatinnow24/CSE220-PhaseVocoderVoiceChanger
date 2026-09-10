@@ -26,6 +26,7 @@ interface AudioStore {
   vizMode: 'waveform' | 'spectrum' | 'spectrogram';
 
   setSelectedFile: (file: AudioFile | null) => void;
+  setFiles: (files: AudioFile[]) => void;
   addFile: (file: AudioFile) => void;
   removeFile: (id: string) => void;
   setIsPlaying: (v: boolean) => void;
@@ -84,7 +85,10 @@ export const useAudioStore = create<AudioStore>((set) => ({
   vizMode: 'waveform',
 
   setSelectedFile: (file) => set({ selectedFile: file }),
-  addFile: (file) => set((state) => ({ files: [...state.files, file] })),
+  setFiles: (files) => set({ files }),
+  addFile: (file) => set((state) => ({
+    files: [file, ...state.files.filter((f) => f.id !== file.id)]
+  })),
   removeFile: (id) => set((state) => ({ files: state.files.filter((f) => f.id !== id) })),
   setIsPlaying: (v) => set({ isPlaying: v }),
   setCurrentTime: (t) => set({ currentTime: t }),
@@ -115,7 +119,6 @@ export const useAudioStore = create<AudioStore>((set) => ({
   setPresets: (p) => set({ presets: p }),
   setActiveTab: (t) => set({ activeTab: t }),
   setVizMode: (m) => set({ vizMode: m }),
-<<<<<<< HEAD
   clearFiles: () => set({
     files: [],
     selectedFile: null,
@@ -128,7 +131,4 @@ export const useAudioStore = create<AudioStore>((set) => ({
     currentTime: 0,
     duration: 0
   }),
-=======
-  clearFiles: () => set({ files: [], selectedFile: null }),
->>>>>>> 0600f2833f482f4b7a57574171cbb2564297adaa
 }));

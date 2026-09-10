@@ -1,5 +1,4 @@
 import { AudioFile } from '../../types';
-import Card from '../ui/Card';
 
 interface AudioFileCardProps {
   file: AudioFile;
@@ -15,32 +14,41 @@ export default function AudioFileCard({ file, onClick, selected }: AudioFileCard
   };
 
   return (
-    <Card 
+    <div 
       onClick={onClick}
-      className={`relative overflow-hidden ${selected ? 'ring-2 ring-primary border-transparent' : ''}`}
-      variant={selected ? 'low' : 'default'}
+      className={`group flex items-center justify-between py-2.5 px-3 rounded-ios-lg transition-all cursor-pointer select-none ${
+        selected 
+          ? 'bg-lavender text-ink-primary' 
+          : 'hover:bg-surface-raised active:scale-[0.99]'
+      }`}
     >
-      <div className="flex items-start gap-4">
-        <div className={`w-12 h-12 rounded-xl flex items-center justify-center shrink-0 ${
-          file.file_type === 'original' ? 'bg-primary-container text-on-primary-container' : 'bg-secondary-container text-on-secondary-fixed'
+      <div className="flex items-center gap-3 min-w-0">
+        <div className={`w-7 h-7 rounded-ios-sm flex items-center justify-center shrink-0 ${
+          selected 
+            ? 'bg-lavender-ink text-white' 
+            : 'bg-surface-raised text-ink-secondary group-hover:bg-surface-muted'
         }`}>
-          <span className="material-symbols-outlined">
-            {file.file_type === 'original' ? 'audio_file' : 'auto_fix_high'}
+          <span className="material-symbols-outlined text-[15px]">
+            {file.file_type === 'original' ? 'audio_file' : 'tune'}
           </span>
         </div>
-        <div className="flex-1 min-w-0">
-          <h4 className="text-body-lg font-bold text-on-surface truncate" title={file.original_filename}>
+        <div className="min-w-0">
+          <h4 className="text-[13px] font-medium text-ink-primary truncate" title={file.original_filename}>
             {file.original_filename}
           </h4>
-          <div className="flex items-center gap-2 mt-1 text-body-sm text-on-surface-variant flex-wrap">
-            <span className="flex items-center gap-1"><span className="material-symbols-outlined text-[16px]">schedule</span> {formatDuration(file.duration_seconds)}</span>
+          <div className="flex items-center gap-2 text-[11px] text-ink-secondary flex-wrap">
+            <span>{formatDuration(file.duration_seconds)}</span>
             <span>•</span>
             <span>{(file.sample_rate / 1000).toFixed(1)} kHz</span>
             <span>•</span>
-            <span className="uppercase">{file.file_type}</span>
+            <span className="uppercase text-[10px] tracking-wider">{file.file_type}</span>
           </div>
         </div>
       </div>
-    </Card>
+
+      <div className="shrink-0 text-ink-tertiary opacity-0 group-hover:opacity-100 transition-opacity pr-1">
+        <span className="material-symbols-outlined text-[16px]">arrow_forward</span>
+      </div>
+    </div>
   );
 }

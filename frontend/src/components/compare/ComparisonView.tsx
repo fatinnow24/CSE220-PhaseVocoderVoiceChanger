@@ -14,94 +14,93 @@ export default function ComparisonView({ result }: ComparisonViewProps) {
   const stretchApplied = metrics.stretch_factor !== 1.0;
 
   return (
-    <div className="flex flex-col gap-6 mt-8">
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        <Card variant="colored" color="primary">
-          <div className="flex justify-between items-center mb-4">
-            <h3 className="text-title-md font-bold text-on-primary-container">Phase Vocoder Output</h3>
-            <span className="bg-primary text-on-primary px-3 py-1 rounded-full text-label-caps">Advanced</span>
+    <div className="flex flex-col gap-5 mt-6">
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+        {/* Phase Vocoder Output Card - Live Oscilloscope soft blue (#dce6f0) */}
+        <div className="bg-[#dce6f0] rounded-[24px] p-5 md:p-6 flex flex-col gap-3 transition-all">
+          <div className="flex justify-between items-center px-1">
+            <h3 className="text-[14px] font-semibold text-ink-primary">Phase Vocoder Output</h3>
+            <span className="text-[12px] font-medium text-ink-secondary">
+              Phase Locked
+            </span>
           </div>
-          <NativeAudioPlayer url={getStreamUrl(pv_file.id)} title="Phase Vocoder Output" />
-        </Card>
+          <NativeAudioPlayer
+            url={getStreamUrl(pv_file.id)}
+            className="bg-transparent !p-0"
+          />
+        </div>
 
-        <Card variant="colored" color="secondary">
-          <div className="flex justify-between items-center mb-4">
-            <h3 className="text-title-md font-bold text-on-secondary-fixed">Naive Resampling</h3>
-            <span className="bg-secondary text-on-secondary px-3 py-1 rounded-full text-label-caps">Basic</span>
+        {/* Naive Resampling Output Card - Spectrum FFT soft lavender/gray (#e5e3e8) */}
+        <div className="bg-[#e5e3e8] rounded-[24px] p-5 md:p-6 flex flex-col gap-3 transition-all">
+          <div className="flex justify-between items-center px-1">
+            <h3 className="text-[14px] font-semibold text-ink-primary">Naive Resampling</h3>
+            <span className="text-[12px] font-medium text-ink-secondary">
+              Time Domain
+            </span>
           </div>
-          <NativeAudioPlayer url={getStreamUrl(naive_file.id)} title="Naive Output" />
-        </Card>
+          <NativeAudioPlayer
+            url={getStreamUrl(naive_file.id)}
+            className="bg-transparent !p-0"
+          />
+        </div>
       </div>
 
-      <Card>
-        <h3 className="text-title-md font-bold text-on-surface mb-6">Algorithm Comparison</h3>
+      <Card variant="surface" className="flex flex-col gap-3">
+        <h3 className="text-[15px] font-semibold text-ink-primary tracking-tight px-1">
+          Metrics & Artifact Comparison
+        </h3>
         <div className="overflow-x-auto">
-          <table className="w-full text-left border-collapse min-w-[600px]">
+          <table className="w-full text-left border-collapse min-w-[550px]">
             <thead>
-              <tr className="border-b-2 border-surface-container-high text-body-sm text-on-surface-variant">
-                <th className="py-4 px-4 font-bold">Property</th>
-                <th className="py-4 px-4 font-bold text-primary">Phase Vocoder</th>
-                <th className="py-4 px-4 font-bold text-secondary">Naive Resampling</th>
+              <tr className="bg-surface-raised text-[12px] text-ink-secondary">
+                <th className="py-2.5 px-3 rounded-l-ios-md font-medium">Property</th>
+                <th className="py-2.5 px-3 font-semibold text-ink-primary">Phase Vocoder</th>
+                <th className="py-2.5 px-3 rounded-r-ios-md font-medium text-ink-secondary">Naive Resampling</th>
               </tr>
             </thead>
-            <tbody className="text-body-lg">
+            <tbody className="text-[13px]">
               {pitchApplied && (
-                <tr className="border-b border-surface-container-high">
-                  <td className="py-4 px-4 font-medium">Pitch Shifted</td>
-                  <td className="py-4 px-4"><span className="text-green-600 font-bold">?</span> {metrics.semitones > 0 ? '+' : ''}{metrics.semitones} st</td>
-                  <td className="py-4 px-4"><span className="text-green-600 font-bold">?</span> {metrics.semitones > 0 ? '+' : ''}{metrics.semitones} st</td>
+                <tr className="border-b border-hairline">
+                  <td className="py-3 px-3 text-ink-secondary">Pitch Shift</td>
+                  <td className="py-3 px-3 text-ink-primary font-semibold">
+                    {metrics.semitones > 0 ? '+' : ''}{metrics.semitones} st
+                  </td>
+                  <td className="py-3 px-3 text-ink-secondary">
+                    {metrics.semitones > 0 ? '+' : ''}{metrics.semitones} st
+                  </td>
                 </tr>
               )}
               {stretchApplied && (
-                <tr className="border-b border-surface-container-high">
-                  <td className="py-4 px-4 font-medium">Time Stretched</td>
-                  <td className="py-4 px-4"><span className="text-green-600 font-bold">?</span> {metrics.stretch_factor.toFixed(2)}x</td>
-                  <td className="py-4 px-4"><span className="text-green-600 font-bold">?</span> {metrics.stretch_factor.toFixed(2)}x</td>
+                <tr className="border-b border-hairline">
+                  <td className="py-3 px-3 text-ink-secondary">Time Stretch</td>
+                  <td className="py-3 px-3 text-ink-primary font-semibold">
+                    {metrics.stretch_factor.toFixed(2)}x
+                  </td>
+                  <td className="py-3 px-3 text-ink-secondary">
+                    {metrics.stretch_factor.toFixed(2)}x
+                  </td>
                 </tr>
               )}
-              <tr className="border-b border-surface-container-high">
-                <td className="py-4 px-4 font-medium">
-                  {stretchApplied ? 'Output Duration' : 'Duration Preserved'}
+              <tr className="border-b border-hairline">
+                <td className="py-3 px-3 text-ink-secondary">Duration Behavior</td>
+                <td className="py-3 px-3">
+                  <span className="text-ink-primary font-semibold">{metrics.pv.duration.toFixed(2)}s</span>
+                  <span className="text-[11px] text-ink-tertiary ml-1.5">(Preserves timing)</span>
                 </td>
-                <td className="py-4 px-4">
-                  {stretchApplied
-                    ? <><span className="text-primary font-bold">{metrics.pv.duration.toFixed(2)}s</span> ({(metrics.pv.duration / metrics.original.duration).toFixed(2)}x)</>
-                    : Math.abs(metrics.pv.duration - metrics.original.duration) < 0.1
-                      ? <><span className="text-green-600 font-bold">?</span> Same ({metrics.pv.duration.toFixed(2)}s)</>
-                      : <><span className="text-yellow-600 font-bold">?</span> Slightly Off ({metrics.pv.duration.toFixed(2)}s)</>}
-                </td>
-                <td className="py-4 px-4">
-                  {stretchApplied
-                    ? <><span className="text-secondary font-bold">{metrics.naive.duration.toFixed(2)}s</span> ({(metrics.naive.duration / metrics.original.duration).toFixed(2)}x)</>
-                    : Math.abs(metrics.naive.duration - metrics.original.duration) < 0.1
-                      ? <><span className="text-green-600 font-bold">?</span> Same ({metrics.naive.duration.toFixed(2)}s)</>
-                      : <><span className="text-red-600 font-bold">?</span> Changed ({metrics.naive.duration.toFixed(2)}s)</>}
+                <td className="py-3 px-3">
+                  <span className="text-ink-secondary">{metrics.naive.duration.toFixed(2)}s</span>
+                  <span className="text-[11px] text-ink-tertiary ml-1.5">(Chipmunk effect)</span>
                 </td>
               </tr>
-              {pitchApplied && (
-                <tr className="border-b border-surface-container-high">
-                  <td className="py-4 px-4 font-medium">Pitch Accuracy</td>
-                  <td className="py-4 px-4">
-                    {metrics.pv.dominant_freq > 0
-                      ? <><span className="text-green-600 font-bold">?</span> {metrics.pv.dominant_freq.toFixed(1)} Hz (target {metrics.pv.expected_freq.toFixed(1)} Hz)</>
-                      : <span className="text-on-surface-variant">—</span>}
-                  </td>
-                  <td className="py-4 px-4">
-                    {metrics.naive.dominant_freq > 0
-                      ? <>{metrics.naive.dominant_freq.toFixed(1)} Hz (target {metrics.naive.expected_freq.toFixed(1)} Hz)</>
-                      : <span className="text-on-surface-variant">—</span>}
-                  </td>
-                </tr>
-              )}
-              <tr className="border-b border-surface-container-high">
-                <td className="py-4 px-4 font-medium">Algorithm</td>
-                <td className="py-4 px-4 text-on-surface-variant">STFT + Phase Propagation</td>
-                <td className="py-4 px-4 text-on-surface-variant">Sample Rate Conversion</td>
+              <tr className="border-b border-hairline">
+                <td className="py-3 px-3 text-ink-secondary">DSP Mechanism</td>
+                <td className="py-3 px-3 text-ink-primary">STFT Frame Synthesis + Phase Unwrapping</td>
+                <td className="py-3 px-3 text-ink-secondary">Sinc Interpolation</td>
               </tr>
               <tr>
-                <td className="py-4 px-4 font-medium">Phase Coherence</td>
-                <td className="py-4 px-4 text-on-surface-variant">Maintained</td>
-                <td className="py-4 px-4 text-on-surface-variant">Not controlled</td>
+                <td className="py-3 px-3 text-ink-secondary">Vertical Phase Coherence</td>
+                <td className="py-3 px-3 text-success font-medium">Locked (Transient crispness)</td>
+                <td className="py-3 px-3 text-ink-tertiary">Unmanaged</td>
               </tr>
             </tbody>
           </table>

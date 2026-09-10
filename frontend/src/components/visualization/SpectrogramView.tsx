@@ -79,21 +79,21 @@ export default function SpectrogramView() {
   }, [spectrogramData]);
 
   return (
-    <div className="w-full h-64 bg-surface-container-lowest rounded-3xl shadow-card overflow-hidden p-4 flex flex-col">
+    <div className="w-full h-64 bg-transparent rounded-ios-2xl overflow-hidden p-4 flex flex-col">
       <div className="flex justify-between items-center mb-2">
-        <h4 className="text-label-caps text-on-surface-variant">SPECTROGRAM (STFT)</h4>
+        <h4 className="text-[12px] font-semibold text-ink-secondary">SPECTROGRAM (STFT)</h4>
         {spectrogramData && (
-          <span className="text-label-caps text-on-surface-variant">
+          <span className="text-[10px] text-ink-tertiary">
             {spectrogramData.times.length} frames × {spectrogramData.frequencies.length} bins
           </span>
         )}
       </div>
-      <div className="flex-1 relative rounded-xl overflow-hidden">
+      <div className="flex-1 relative rounded-ios-lg overflow-hidden bg-black/5">
         <canvas ref={canvasRef} className="absolute inset-0 w-full h-full" />
         {!spectrogramData && (
-          <div className="absolute inset-0 flex flex-col items-center justify-center bg-surface-container-low rounded-xl text-on-surface-variant gap-2">
-            <span className="material-symbols-outlined text-3xl">spectrogram</span>
-            <p className="text-body-sm">Load and analyze a file to see spectrogram</p>
+          <div className="absolute inset-0 flex flex-col items-center justify-center text-ink-tertiary gap-1.5">
+            <span className="material-symbols-outlined text-[24px]">graphic_eq</span>
+            <p className="text-[12px]">Load audio to compute STFT spectrogram</p>
           </div>
         )}
       </div>

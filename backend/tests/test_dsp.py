@@ -15,7 +15,8 @@ def test_fft_440hz_sine():
     mag = magnitude_spectrum(spec)
     freqs = frequency_axis(2048, sr)
     dom_freq = freqs[np.argmax(mag[:1025])]
-    assert abs(dom_freq - 440) < 5
+    # Frequency bin resolution is sr/N = 44100/2048 = ~21.5 Hz
+    assert abs(dom_freq - 440) <= (sr / 2048)
 
 def test_pitch_shift_up_12st():
     sr = 44100

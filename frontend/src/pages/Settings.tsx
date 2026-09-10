@@ -1,42 +1,35 @@
-import { useAudioStore } from '../store/useAudioStore';
 import Card from '../components/ui/Card';
-import Toggle from '../components/ui/Toggle';
 
 export default function Settings() {
-  const { theme, setTheme } = useAudioStore();
-
   return (
-    <div className="max-w-4xl mx-auto space-y-8 animate-in fade-in duration-500">
-      <header className="mb-4">
-        <h1 className="text-display font-bold text-on-surface mb-2">Settings</h1>
-        <p className="text-headline-lg font-medium text-on-surface-variant">Customize your DSP laboratory experience.</p>
+    <div className="max-w-3xl mx-auto space-y-4 animate-in fade-in duration-300">
+      <header className="space-y-1">
+        <h1 className="text-[26px] font-semibold text-ink-primary">Settings</h1>
+        <p className="text-[13px] text-ink-secondary">Configure defaults for audio synthesis and analysis.</p>
       </header>
 
-      <Card>
-        <h3 className="text-title-md font-bold text-on-surface mb-6">Appearance</h3>
+      <Card className="!p-5 space-y-3">
+        <h3 className="text-[14px] font-semibold text-ink-primary">System Parameters</h3>
         
-        <div className="flex items-center justify-between p-4 bg-surface-container-low rounded-2xl border border-surface-container-high">
-          <div>
-            <h4 className="font-bold text-body-lg text-on-surface mb-1">Dark Mode</h4>
-            <p className="text-body-sm text-on-surface-variant">Toggle dark theme across the application for easier viewing in low-light environments.</p>
+        <div className="space-y-2">
+          <div className="p-3 bg-surface-raised rounded-ios-lg flex justify-between items-center text-[13px]">
+            <div>
+              <h4 className="font-semibold text-ink-primary">Processing Pipeline Sample Rate</h4>
+              <p className="text-[11px] text-ink-secondary">Internal DSP rate for phase calculation</p>
+            </div>
+            <div className=" text-[12px] text-ink-primary bg-lavender/70 px-2.5 py-1 rounded-pill font-semibold">
+              44,100 Hz
+            </div>
           </div>
-          
-          <Toggle 
-            checked={theme === 'dark'} 
-            onChange={(checked) => setTheme(checked ? 'dark' : 'light')} 
-            label={theme === 'dark' ? 'Dark' : 'Light'} 
-          />
-        </div>
-      </Card>
-      
-      <Card>
-        <h3 className="text-title-md font-bold text-on-surface mb-6">Audio Processing Defaults</h3>
-        
-        <div className="space-y-4">
-           <div className="p-4 bg-surface-container-low rounded-2xl border border-surface-container-high">
-            <h4 className="font-bold text-body-lg text-on-surface mb-1">Global Sample Rate</h4>
-            <p className="text-body-sm text-on-surface-variant mb-3">Target processing rate for the engine.</p>
-            <div className="font-mono text-primary font-bold">44100 Hz</div>
+
+          <div className="p-3 bg-surface-raised rounded-ios-lg flex justify-between items-center text-[13px]">
+            <div>
+              <h4 className="font-semibold text-ink-primary">Default Analysis Window</h4>
+              <p className="text-[11px] text-ink-secondary">Hann windowing with 75% overlap</p>
+            </div>
+            <div className=" text-[12px] text-ink-primary bg-lavender/70 px-2.5 py-1 rounded-pill font-semibold">
+              2048 / 512
+            </div>
           </div>
         </div>
       </Card>

@@ -1,0 +1,218 @@
+{
+  "color": {
+    "Background Cream": {
+      "$type": "color",
+      "$value": "#f4f3ee",
+      "$description": "Global page background and primary surface; CSS var --background, --color-cream, --color-background"
+    },
+    "Dark Text": {
+      "$type": "color",
+      "$value": "#26211c",
+      "$description": "Primary heading and body text color; CSS var --color-dark"
+    },
+    "Pure Black": {
+      "$type": "color",
+      "$value": "#000000",
+      "$description": "Link and icon color at highest contrast; most frequent CSSOM hit (1331)"
+    },
+    "White Surface": {
+      "$type": "color",
+      "$value": "#ffffff",
+      "$description": "Card chip backgrounds and modal surfaces; CSS var --surface, --color-white"
+    },
+    "Purple Primary": {
+      "$type": "color",
+      "$value": "#684d95",
+      "$description": "Brand accent, CTA buttons, interactive highlights; CSS var --primary"
+    },
+    "Secondary Text": {
+      "$type": "color",
+      "$value": "#57534e",
+      "$description": "Muted secondary text and captions; CSS var --color-gray-600"
+    },
+    "Category Mobile": {
+      "$type": "color",
+      "$value": "#f0ead8",
+      "$description": "Mobile app category card background tint; CSS var --color-cat-mobile"
+    },
+    "Category Web App": {
+      "$type": "color",
+      "$value": "#dce6f0",
+      "$description": "Web app category card background tint; CSS var --color-cat-webapp"
+    },
+    "Category Pages": {
+      "$type": "color",
+      "$value": "#e5e3e8",
+      "$description": "Website/pages category card background tint; CSS var --color-cat-pages"
+    },
+    "Category Components": {
+      "$type": "color",
+      "$value": "#f0e3db",
+      "$description": "Components category card background tint; CSS var --color-cat-components"
+    },
+    "Category Flows": {
+      "$type": "color",
+      "$value": "#e3e8e4",
+      "$description": "Flows category card background tint; CSS var --color-cat-flows"
+    },
+    "Border Subtle": {
+      "$type": "color",
+      "$value": "#6b7280",
+      "$description": "Hairline borders and dividers at 30% opacity; CSS var --border"
+    }
+  },
+  "typography": {
+    "Display Hero": {
+      "$type": "typography",
+      "$value": {
+        "fontFamily": "TT Hoves, Arial, sans-serif",
+        "fontSize": "60px",
+        "fontWeight": 600,
+        "lineHeight": "66px",
+        "letterSpacing": "-3%"
+      },
+      "$description": "Hero headline — 'Check every detail, ship better work.' Probe-confirmed at 60px/w600"
+    },
+    "Section Heading": {
+      "$type": "typography",
+      "$value": {
+        "fontFamily": "TT Hoves, Arial, sans-serif",
+        "fontSize": "32px",
+        "fontWeight": 600,
+        "lineHeight": "40px",
+        "letterSpacing": "-3%"
+      },
+      "$description": "Category section titles (Mobile app, Web app, Website)"
+    },
+    "Card Title": {
+      "$type": "typography",
+      "$value": {
+        "fontFamily": "TT Hoves, Arial, sans-serif",
+        "fontSize": "20px",
+        "fontWeight": 600,
+        "lineHeight": "27.5px",
+        "letterSpacing": "-1%"
+      },
+      "$description": "Sub-section or card headings"
+    },
+    "Body Default": {
+      "$type": "typography",
+      "$value": {
+        "fontFamily": "TT Hoves, Arial, sans-serif",
+        "fontSize": "16px",
+        "fontWeight": 400,
+        "lineHeight": "24px",
+        "letterSpacing": "-1%"
+      },
+      "$description": "Primary body text, navigation links, chip labels — most frequent CSSOM tuple (×807)"
+    },
+    "Body Medium": {
+      "$type": "typography",
+      "$value": {
+        "fontFamily": "TT Hoves, Arial, sans-serif",
+        "fontSize": "16px",
+        "fontWeight": 500,
+        "lineHeight": "24px",
+        "letterSpacing": "-1%"
+      },
+      "$description": "Emphasized body text, nav active states"
+    },
+    "Label Small": {
+      "$type": "typography",
+      "$value": {
+        "fontFamily": "TT Hoves, Arial, sans-serif",
+        "fontSize": "12px",
+        "fontWeight": 500,
+        "lineHeight": "16px",
+        "letterSpacing": "-1%"
+      },
+      "$description": "Small labels, badges, metadata tags"
+    },
+    "Caption": {
+      "$type": "typography",
+      "$value": {
+        "fontFamily": "TT Hoves, Arial, sans-serif",
+        "fontSize": "14px",
+        "fontWeight": 400,
+        "lineHeight": "20px",
+        "letterSpacing": "-1%"
+      },
+      "$description": "Subtitle text, secondary descriptions"
+    },
+    "Relative Label": {
+      "$type": "typography",
+      "$value": {
+        "fontFamily": "Relative Book, sans-serif",
+        "fontSize": "14px",
+        "fontWeight": 500,
+        "lineHeight": "20px",
+        "letterSpacing": "-1%"
+      },
+      "$description": "Special label usage — 'Agent skill' / 'Figma skill' tool badges"
+    }
+  },
+  "spacing": {
+    "space-1": {
+      "$type": "dimension",
+      "$value": "4px"
+    },
+    "space-2": {
+      "$type": "dimension",
+      "$value": "8px"
+    },
+    "space-3": {
+      "$type": "dimension",
+      "$value": "12px"
+    },
+    "space-4": {
+      "$type": "dimension",
+      "$value": "16px"
+    },
+    "space-6": {
+      "$type": "dimension",
+      "$value": "24px"
+    },
+    "space-10": {
+      "$type": "dimension",
+      "$value": "40px"
+    },
+    "space-16": {
+      "$type": "dimension",
+      "$value": "64px"
+    },
+    "space-20": {
+      "$type": "dimension",
+      "$value": "80px"
+    },
+    "space-24": {
+      "$type": "dimension",
+      "$value": "96px"
+    }
+  },
+  "borderRadius": {
+    "radius-sm": {
+      "$type": "dimension",
+      "$value": "8px"
+    },
+    "radius-md": {
+      "$type": "dimension",
+      "$value": "12px"
+    },
+    "radius-lg": {
+      "$type": "dimension",
+      "$value": "24px"
+    },
+    "radius-2xl": {
+      "$type": "dimension",
+      "$value": "16px"
+    },
+    "radius-3xl": {
+      "$type": "dimension",
+      "$value": "24px"
+    },
+    "radius-pill": {
+      "$type": "dimension",
+      "$value": "9999px"
+    }
+  }
+}
