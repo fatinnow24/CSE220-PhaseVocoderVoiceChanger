@@ -78,3 +78,11 @@ djangoSample/
 .DS_Store
 Thumbs.db
 desktop.ini
+
+# ──────────────────────────────────────────────
+# Agent / internal tools
+# ──────────────────────────────────────────────
+scripts/
+.agents/
+.commandcode/
+.gemini/
