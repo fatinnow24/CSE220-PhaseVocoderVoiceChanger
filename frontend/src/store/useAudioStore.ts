@@ -7,6 +7,7 @@ interface AudioStore {
   
   files: AudioFile[];
   selectedFile: AudioFile | null;
+  originalFile: AudioFile | null;
   isPlaying: boolean;
   currentTime: number;
   duration: number;
@@ -51,6 +52,8 @@ interface AudioStore {
   setActiveTab: (t: string) => void;
   setVizMode: (m: 'waveform' | 'spectrum' | 'spectrogram') => void;
   clearFiles: () => void;
+  setOriginalFile: (f: AudioFile | null) => void;
+  restoreToOriginal: () => void;
 }
 
 export const useAudioStore = create<AudioStore>((set) => ({
@@ -66,6 +69,7 @@ export const useAudioStore = create<AudioStore>((set) => ({
 
   files: [],
   selectedFile: null,
+  originalFile: null,
   isPlaying: false,
   currentTime: 0,
   duration: 0,
@@ -84,7 +88,17 @@ export const useAudioStore = create<AudioStore>((set) => ({
   activeTab: 'studio',
   vizMode: 'waveform',
 
-  setSelectedFile: (file) => set({ selectedFile: file }),
+  setSelectedFile: (file) => set((state) => {
+    // If the incoming file is an original, update originalFile too
+    if (file && file.file_type === 'original') {
+      return { selectedFile: file, originalFile: file };
+    }
+    // If originalFile not yet set, set it on the first file regardless
+    if (file && !state.originalFile) {
+      return { selectedFile: file, originalFile: file };
+    }
+    return { selectedFile: file };
+  }),
   setFiles: (files) => set({ files }),
   addFile: (file) => set((state) => ({
     files: [file, ...state.files.filter((f) => f.id !== file.id)]
@@ -122,6 +136,7 @@ export const useAudioStore = create<AudioStore>((set) => ({
   clearFiles: () => set({
     files: [],
     selectedFile: null,
+    originalFile: null,
     processedFiles: [],
     analysis: null,
     waveformData: null,
@@ -130,5 +145,16 @@ export const useAudioStore = create<AudioStore>((set) => ({
     isPlaying: false,
     currentTime: 0,
     duration: 0
+  }),
+  setOriginalFile: (f) => set({ originalFile: f }),
+  restoreToOriginal: () => set((state) => {
+    const orig = state.originalFile;
+    if (!orig) return {};
+    return {
+      selectedFile: orig,
+      waveformData: null,
+      spectrogramData: null,
+      analysis: null,
+    };
   }),
 }));
