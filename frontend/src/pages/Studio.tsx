@@ -89,8 +89,8 @@ export default function Studio() {
     return (
       <div className="max-w-2xl mx-auto mt-8 animate-in fade-in duration-300 space-y-4">
         <div className="text-center space-y-1 mb-6">
-          <h1 className="text-[26px] font-semibold text-ink-primary">Select Audio File</h1>
-          <p className="text-[13px] text-ink-secondary">Upload an audio recording to adjust pitch, time-scale, and inspect spectral domains.</p>
+          <h1 className="text-[26px] font-semibold text-ink-primary">Audio Input</h1>
+          <p className="text-[13px] text-ink-secondary">Upload or record audio to adjust pitch, time-scale, and inspect spectral domains.</p>
         </div>
         <UploadZone
           onFileSelect={handleFileSelect}
