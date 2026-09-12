@@ -2,6 +2,7 @@ import { ComparisonResult } from '../../types';
 import Card from '../ui/Card';
 import NativeAudioPlayer from '../audio/NativeAudioPlayer';
 import { getStreamUrl } from '../../api/client';
+import DurationExplanation from './DurationExplanation';
 
 interface ComparisonViewProps {
   result: ComparisonResult;
@@ -44,6 +45,13 @@ export default function ComparisonView({ result }: ComparisonViewProps) {
           />
         </div>
       </div>
+
+      <DurationExplanation
+        originalDuration={metrics.original.duration}
+        semitones={metrics.semitones}
+        pitchFactor={metrics.pitch_factor}
+        stretchFactor={metrics.stretch_factor}
+      />
 
       <Card variant="surface" className="flex flex-col gap-3">
         <h3 className="text-[15px] font-semibold text-ink-primary tracking-tight px-1">

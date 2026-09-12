@@ -221,13 +221,12 @@ def process_compare(request):
         # --- Naive Resampling pipeline ---
         pitch_factor = semitones_to_pitch_factor(semitones)
         
-        # Naive resampling can only couple pitch and duration.
-        if semitones != 0:
-            # Naive pitch shift via resampling (fails to preserve duration)
-            res_naive = naive_resample(signal, sr, pitch_factor)
-        else:
-            # Naive time stretch (fails to preserve pitch)
-            res_naive = naive_resample(signal, sr, 1.0 / stretch_factor)
+        # Naive resampling couples pitch and duration for both operations.
+        # Combined resampling factor: pitch_factor / stretch_factor
+        # Pitch shift by -5st (pitch_factor ≈ 0.749) -> duration 7.0 / 0.749 = 9.34s
+        # Additional 1.5x stretch -> duration 9.34 * 1.5 = 14.02s
+        effective_naive_factor = pitch_factor / stretch_factor
+        res_naive = naive_resample(signal, sr, effective_naive_factor)
         af_naive = _save_new_audio(
             res_naive, sr,
             f"naive_{semitones:+.1f}st_{stretch_factor:.2f}x_{af.original_filename}",

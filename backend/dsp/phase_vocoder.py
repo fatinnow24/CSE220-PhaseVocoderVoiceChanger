@@ -175,11 +175,26 @@ def pitch_shift(
     phase_locking: bool = False,
 ) -> np.ndarray:
     """
-    Pitch shift by the given number of semitones, preserving duration.
+    Pitch-shift *signal* by *semitones* while preserving its duration exactly.
 
     Pipeline:
-        1. Time-stretch by 1/pitch_factor  → same pitch, shorter/longer duration
-        2. Resample by pitch_factor         → original duration, shifted pitch
+        pitch_factor = 2 ** (semitones / 12)
+
+        1. Phase-vocoder time-stretch by pitch_factor.
+           This compresses or expands the signal in time while keeping pitch
+           relationships intact (pitch_factor < 1 → shorter, > 1 → longer).
+
+        2. Resample the stretched result back to EXACTLY len(signal) samples.
+           The explicit target_length guarantees the output sample count is
+           identical to the input regardless of floating-point rounding.
+
+    Result: same duration, pitch shifted by *semitones*.
+            len(output) == len(signal) is always true.
+
+    Examples:
+        -5  semitones: pitch_factor ≈ 0.749  →  PV compresses, resample expands back
+        +12 semitones: pitch_factor = 2.0    →  PV doubles length, resample halves back
+        -12 semitones: pitch_factor = 0.5    →  PV halves length, resample doubles back
     """
     if semitones == 0.0:
         return signal.copy()
@@ -187,7 +202,11 @@ def pitch_shift(
     pitch_factor = 2.0 ** (semitones / 12.0)
     stretch_fn = time_stretch_with_phase_locking if phase_locking else time_stretch
     stretched = stretch_fn(signal, sample_rate, pitch_factor, n_fft, ha, window_type)
-    return naive_resample(stretched, sample_rate, pitch_factor)
+
+    # Resample back to the ORIGINAL sample count — explicit target_length
+    # guarantees exactly len(signal) samples regardless of rounding in pitch_factor.
+    return naive_resample(stretched, sample_rate, pitch_factor, target_length=len(signal))
+
 
 
 def dominant_frequency(signal: np.ndarray, sample_rate: int) -> float:

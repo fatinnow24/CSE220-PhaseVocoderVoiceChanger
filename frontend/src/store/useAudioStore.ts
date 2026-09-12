@@ -155,6 +155,8 @@ export const useAudioStore = create<AudioStore>((set) => ({
       waveformData: null,
       spectrogramData: null,
       analysis: null,
+      comparisonResult: null,
     };
   }),
+
 }));

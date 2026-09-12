@@ -30,6 +30,12 @@ export default function Compare() {
     }
   }, [files.length, selectedFile, setFiles, setSelectedFile]);
 
+  // Clear comparison result when the selected file changes
+  useEffect(() => {
+    setComparisonResult(null);
+  }, [selectedFile?.id, setComparisonResult]);
+
+
   const handleCompare = async () => {
     if (!selectedFile) {
       alert("Please upload or select an audio file first.");
