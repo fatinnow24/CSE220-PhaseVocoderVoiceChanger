@@ -8,6 +8,7 @@ import StudioEffectsChain from '../components/studio/StudioEffectsChain';
 import { StudioAnalysisMetrics, StudioSpectrogramCard } from '../components/studio/StudioAnalysisCards';
 import UploadZone from '../components/audio/UploadZone';
 import Button from '../components/ui/Button';
+import AudioFileCard from '../components/audio/AudioFileCard';
 import {
   uploadAudio,
   getWaveform,
@@ -15,11 +16,16 @@ import {
   analyzeFile,
   getStreamUrl,
   getExportUrl,
+  listFiles,
+  deleteAllFiles,
 } from '../api/client';
 
 export default function Studio() {
   const navigate = useNavigate();
   const {
+    files,
+    setFiles,
+    clearFiles,
     selectedFile,
     setSelectedFile,
     addFile,
@@ -32,7 +38,33 @@ export default function Studio() {
   } = useAudioStore();
 
   const [isUploading, setIsUploading] = useState(false);
+  const [isClearing, setIsClearing] = useState(false);
   const [uploadError, setUploadError] = useState<string | null>(null);
+
+  const handleClearSessions = async () => {
+    if (!window.confirm("Are you sure you want to remove all recent sessions? This will permanently delete all uploaded and processed audio files.")) {
+      return;
+    }
+    
+    setIsClearing(true);
+    try {
+      await deleteAllFiles();
+      clearFiles();
+    } catch (e) {
+      console.error("Failed to clear sessions", e);
+    } finally {
+      setIsClearing(false);
+    }
+  };
+
+  useEffect(() => {
+    if (!selectedFile) {
+      listFiles().then(res => {
+        const backendFiles = res.data.data || [];
+        setFiles(backendFiles);
+      }).catch(() => {});
+    }
+  }, [setFiles, selectedFile]);
 
   useEffect(() => {
     if (selectedFile) {
@@ -87,18 +119,58 @@ export default function Studio() {
 
   if (!selectedFile) {
     return (
-      <div className="max-w-2xl mx-auto mt-8 animate-in fade-in duration-300 space-y-4">
-        <div className="text-center space-y-1 mb-6">
-          <h1 className="text-[26px] font-semibold text-ink-primary">Audio Input</h1>
-          <p className="text-[13px] text-ink-secondary">Upload or record audio to adjust pitch, time-scale, and inspect spectral domains.</p>
+      <div className="max-w-3xl mx-auto mt-8 animate-in fade-in duration-300 space-y-8">
+        <div className="space-y-4">
+          <div className="text-center space-y-1 mb-6">
+            <h1 className="text-[26px] font-semibold text-ink-primary">Audio Input</h1>
+            <p className="text-[13px] text-ink-secondary">Upload or record audio to adjust pitch, time-scale, and inspect spectral domains.</p>
+          </div>
+          <UploadZone
+            onFileSelect={handleFileSelect}
+            isUploading={isUploading}
+          />
+          {uploadError && (
+            <p className="text-center text-error text-[12px]">{uploadError}</p>
+          )}
         </div>
-        <UploadZone
-          onFileSelect={handleFileSelect}
-          isUploading={isUploading}
-        />
-        {uploadError && (
-          <p className="text-center text-error text-[12px]">{uploadError}</p>
-        )}
+
+        {/* Recent Sessions */}
+        <div className="pt-8 border-t border-hairline">
+          <div className="flex items-center justify-between mb-4">
+            <h2 className="text-[16px] font-semibold text-ink-primary">Recent Sessions</h2>
+            {files.length > 0 && (
+              <button
+                onClick={handleClearSessions}
+                disabled={isClearing}
+                className="flex items-center justify-center gap-2 px-3 py-2 rounded-ios-lg border border-hairline bg-surface hover:bg-error-soft text-ink-secondary hover:text-error hover:border-error/20 text-[12px] font-medium transition-all active:scale-[0.98] disabled:opacity-50 disabled:pointer-events-none"
+              >
+                <span className="material-symbols-outlined text-[16px]">delete_sweep</span>
+                <span>{isClearing ? 'Clearing...' : 'Clear Sessions'}</span>
+              </button>
+            )}
+          </div>
+
+          {files.length === 0 ? (
+            <div className="py-12 text-center text-ink-tertiary bg-surface rounded-ios-2xl border border-hairline border-dashed">
+              <span className="material-symbols-outlined text-[28px] mb-2 opacity-60">library_music</span>
+              <p className="text-[13px]">No audio sessions loaded yet.</p>
+            </div>
+          ) : (
+            <div className="divide-y divide-hairline bg-surface rounded-ios-2xl border border-hairline overflow-hidden">
+              {files.map((file) => (
+                <AudioFileCard
+                  key={file.id}
+                  file={file}
+                  onClick={() => {
+                    setSelectedFile(file);
+                    getWaveform(file.id, 1200).then(r => setWaveformData(r.data.data)).catch(() => {});
+                    getSpectrogram(file.id).then(r => setSpectrogramData(r.data.data)).catch(() => {});
+                  }}
+                />
+              ))}
+            </div>
+          )}
+        </div>
       </div>
     );
   }

@@ -1,41 +1,15 @@
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import UploadZone from '../components/audio/UploadZone';
 import Card from '../components/ui/Card';
-import AudioFileCard from '../components/audio/AudioFileCard';
 import { useAudioStore } from '../store/useAudioStore';
-import { uploadAudio, getWaveform, getSpectrogram, listFiles, deleteFile } from '../api/client';
-import Button from '../components/ui/Button';
+import { uploadAudio, getWaveform, getSpectrogram } from '../api/client';
 
 export default function Dashboard() {
   const navigate = useNavigate();
-  const { files, setFiles, addFile, setSelectedFile, setWaveformData, setAnalysis, setSpectrogramData, clearFiles } = useAudioStore();
+  const { addFile, setSelectedFile, setWaveformData, setAnalysis, setSpectrogramData } = useAudioStore();
   const [isUploading, setIsUploading] = useState(false);
-  const [isClearing, setIsClearing] = useState(false);
   const [uploadError, setUploadError] = useState<string | null>(null);
-
-  const handleClearSessions = async () => {
-    if (!window.confirm("Are you sure you want to delete all recent sessions? This cannot be undone.")) {
-      return;
-    }
-    
-    setIsClearing(true);
-    try {
-      await Promise.allSettled(files.map(f => deleteFile(f.id)));
-      clearFiles();
-    } catch (e) {
-      console.error("Failed to clear sessions", e);
-    } finally {
-      setIsClearing(false);
-    }
-  };
-
-  useEffect(() => {
-    listFiles().then(res => {
-      const backendFiles = res.data.data || [];
-      setFiles(backendFiles);
-    }).catch(() => {});
-  }, [setFiles]);
 
   const handleFileSelect = async (file: File) => {
     setIsUploading(true);
@@ -214,45 +188,6 @@ export default function Dashboard() {
             </p>
           </Card>
         </div>
-      </div>
-
-      {/* Recent Sessions — Plain background list without chunky card boxes */}
-      <div>
-        <div className="flex items-center justify-between mb-2">
-          <h2 className="text-[15px] font-semibold text-ink-primary">Recent Sessions</h2>
-          {files.length > 0 && (
-            <Button 
-              variant="ghost" 
-              size="sm" 
-              onClick={handleClearSessions}
-              disabled={isClearing}
-            >
-              {isClearing ? 'Clearing...' : 'Clear All'}
-            </Button>
-          )}
-        </div>
-
-        {files.length === 0 ? (
-          <div className="py-8 text-center text-ink-tertiary">
-            <span className="material-symbols-outlined text-[24px] mb-1 opacity-60">library_music</span>
-            <p className="text-[12px]">No audio sessions loaded yet.</p>
-          </div>
-        ) : (
-          <div className="divide-y divide-hairline">
-            {files.map((file) => (
-              <AudioFileCard
-                key={file.id}
-                file={file}
-                onClick={() => {
-                  setSelectedFile(file);
-                  getWaveform(file.id, 1200).then(r => setWaveformData(r.data.data)).catch(() => {});
-                  getSpectrogram(file.id).then(r => setSpectrogramData(r.data.data)).catch(() => {});
-                  navigate('/studio');
-                }}
-              />
-            ))}
-          </div>
-        )}
       </div>
     </div>
   );
