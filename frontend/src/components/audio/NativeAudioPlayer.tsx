@@ -5,9 +5,10 @@ interface NativeAudioPlayerProps {
   title?: string;
   className?: string;
   onRestoreOriginal?: () => void;
+  onPlaybackStateChange?: (state: { currentTime: number, duration: number, isPlaying: boolean }) => void;
 }
 
-export default function NativeAudioPlayer({ url, title, className = '', onRestoreOriginal }: NativeAudioPlayerProps) {
+export default function NativeAudioPlayer({ url, title, className = '', onRestoreOriginal, onPlaybackStateChange }: NativeAudioPlayerProps) {
   const audioRef = useRef<HTMLAudioElement>(null);
   const [isPlaying, setIsPlaying] = useState(false);
   const [currentTime, setCurrentTime] = useState(0);
@@ -82,6 +83,12 @@ export default function NativeAudioPlayer({ url, title, className = '', onRestor
       audioRef.current.playbackRate = playbackRate;
     }
   }, [playbackRate]);
+
+  useEffect(() => {
+    if (onPlaybackStateChange) {
+      onPlaybackStateChange({ currentTime, duration, isPlaying });
+    }
+  }, [currentTime, duration, isPlaying, onPlaybackStateChange]);
 
   const progressPct = duration > 0 ? (currentTime / duration) * 100 : 0;
   const rates = [0.5, 0.75, 1, 1.25, 1.5, 2];

@@ -3,16 +3,22 @@ import Card from '../ui/Card';
 import NativeAudioPlayer from '../audio/NativeAudioPlayer';
 import { getStreamUrl } from '../../api/client';
 import DurationExplanation from './DurationExplanation';
+import ComparisonSignalGraphs from './ComparisonSignalGraphs';
 
 interface ComparisonViewProps {
   result: ComparisonResult;
 }
+
+import { useState } from 'react';
 
 export default function ComparisonView({ result }: ComparisonViewProps) {
   const { metrics, pv_file, naive_file } = result;
 
   const pitchApplied = metrics.semitones !== 0;
   const stretchApplied = metrics.stretch_factor !== 1.0;
+
+  const [pvProgressPct, setPvProgressPct] = useState(0);
+  const [naiveProgressPct, setNaiveProgressPct] = useState(0);
 
   return (
     <div className="flex flex-col gap-5 mt-6">
@@ -28,6 +34,7 @@ export default function ComparisonView({ result }: ComparisonViewProps) {
           <NativeAudioPlayer
             url={getStreamUrl(pv_file.id)}
             className="bg-transparent !p-0"
+            onPlaybackStateChange={(s) => setPvProgressPct(s.duration > 0 ? (s.currentTime / s.duration) * 100 : 0)}
           />
         </div>
 
@@ -42,6 +49,7 @@ export default function ComparisonView({ result }: ComparisonViewProps) {
           <NativeAudioPlayer
             url={getStreamUrl(naive_file.id)}
             className="bg-transparent !p-0"
+            onPlaybackStateChange={(s) => setNaiveProgressPct(s.duration > 0 ? (s.currentTime / s.duration) * 100 : 0)}
           />
         </div>
       </div>
@@ -114,6 +122,11 @@ export default function ComparisonView({ result }: ComparisonViewProps) {
           </table>
         </div>
       </Card>
+      <ComparisonSignalGraphs 
+        result={result} 
+        pvProgressPct={pvProgressPct}
+        naiveProgressPct={naiveProgressPct}
+      />
     </div>
   );
 }
