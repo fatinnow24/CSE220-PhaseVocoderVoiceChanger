@@ -90,9 +90,6 @@ const AVAILABLE_EFFECTS = [
 
 const PRESET_ICONS: Record<string, string> = {
   alien: 'pest_control',
-  grandpa: 'elderly',
-  woman: 'female',
-  child: 'child_care',
   robot: 'smart_toy',
   deep_voice: 'record_voice_over',
   chipmunk: 'cruelty_free',
@@ -100,7 +97,6 @@ const PRESET_ICONS: Record<string, string> = {
   radio: 'podcasts',
   echo: 'repeat',
   reverb: 'surround_sound',
-  ghost: 'psychology',
   helium: 'air',
   underwater: 'scuba_diving',
   cave: 'landscape',
@@ -240,7 +236,7 @@ export default function Effects() {
   const categories = ['all', 'voice', 'spatial', 'classic'];
   const filteredPresets = presets.filter(p => {
     if (selectedCategory === 'all') return true;
-    if (selectedCategory === 'voice') return ['alien', 'robot', 'chipmunk', 'deep_voice', 'ghost', 'woman', 'child', 'grandpa'].includes(p.name);
+    if (selectedCategory === 'voice') return ['alien', 'robot', 'chipmunk', 'deep_voice'].includes(p.name);
     if (selectedCategory === 'spatial') return ['reverb', 'echo', 'cave', 'underwater'].includes(p.name);
     if (selectedCategory === 'classic') return ['telephone', 'radio', 'megaphone', 'metallic'].includes(p.name);
     return true;

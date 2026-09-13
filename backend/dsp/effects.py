@@ -203,9 +203,6 @@ class CaveEffect(AudioEffect):
         return EchoEffect(delay_sec=0.4, decay=0.6).process(res, sample_rate)
 
 def alien_preset(): return [PitchShiftEffect(8), RingModulationEffect(40.0, 0.8), DistortionEffect(0.3), ReverbEffect(0.2, 0.2)]
-def grandpa_preset(): return [PitchShiftEffect(-4), LowPassFilterEffect(3500), ReverbEffect(0.15, 0.2)]
-def woman_preset(): return [PitchShiftEffect(3), HighPassFilterEffect(200), LowPassFilterEffect(8000)]
-def child_preset(): return [PitchShiftEffect(6), HighPassFilterEffect(300)]
 def robot_preset(): return [RobotEffect()]
 def deep_voice_preset(): return [PitchShiftEffect(-6), LowPassFilterEffect(5000), ReverbEffect(0.1, 0.2)]
 def chipmunk_preset(): return [PitchShiftEffect(10)]
@@ -213,7 +210,6 @@ def telephone_preset(): return [TelephoneEffect()]
 def radio_preset(): return [BandPassFilterEffect(300, 3000), DistortionEffect(0.2), HighPassFilterEffect(200)]
 def echo_preset(): return [EchoEffect(0.3, 0.5)]
 def reverb_preset(): return [ReverbEffect(0.6, 0.4)]
-def ghost_preset(): return [PitchShiftEffect(2), ReverbEffect(0.7, 0.5), WhisperEffect()]
 def helium_preset(): return [PitchShiftEffect(12)]
 def underwater_preset(): return [UnderwaterEffect()]
 def cave_preset(): return [CaveEffect()]
@@ -222,9 +218,6 @@ def metallic_preset(): return [RingModulationEffect(60, 0.8), DistortionEffect(0
 
 EFFECT_PRESETS = {
     'alien': alien_preset,
-    'grandpa': grandpa_preset,
-    'woman': woman_preset,
-    'child': child_preset,
     'robot': robot_preset,
     'deep_voice': deep_voice_preset,
     'chipmunk': chipmunk_preset,
@@ -232,7 +225,6 @@ EFFECT_PRESETS = {
     'radio': radio_preset,
     'echo': echo_preset,
     'reverb': reverb_preset,
-    'ghost': ghost_preset,
     'helium': helium_preset,
     'underwater': underwater_preset,
     'cave': cave_preset,
