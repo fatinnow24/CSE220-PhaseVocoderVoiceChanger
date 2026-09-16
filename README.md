@@ -1,49 +1,125 @@
-# DSP Engine & Phase Vocoder Voice Changer
+# Phase Vocoder Voice Changer & DSP Studio
 
-A full-featured, extensible Digital Signal Processing (DSP) laboratory and Phase Vocoder application built for deep experimentation, audio transformation, and educational exploration of Signals & Systems concepts.
+A full-stack application that serves as a digital signal processing (DSP) laboratory. It allows users to upload audio files, visualize them (Waveform, Spectrum, Spectrogram), apply various DSP effects including Phase Vocoder-based time stretching and pitch shifting, and learn the theoretical background behind these transformations.
 
-## 🚀 Features
+## Tech Stack
 
-- **Advanced Phase Vocoder Implementation:** Real-time pitch shifting and time stretching with phase locking and coherence preservation, preventing the "phasiness" artifact common in naive implementations.
-- **Interactive DSP Laboratory:** Visualize signals in the time-domain (Waveform) and frequency-domain (Spectrum, Spectrogram).
-- **Extensible Effect Chains:** Apply complex effects via an extensible pipeline system (Chorus, Reverb, Delay, Distortion).
-- **Algorithm Comparison Tool:** Directly compare the Phase Vocoder algorithm's performance against Naive Resampling (Sample Rate Conversion).
-- **Signal Generator:** Generate primitives (Sine, Square, Sawtooth, White Noise) to test edge cases, analyze impulse responses, and understand windowing transients.
-- **Modern UI:** Built on the "Serene Logic" design system — utilizing React, Tailwind, and Zustand for state management.
-- **Robust Backend API:** Written in Django + Django REST Framework + NumPy/SciPy for serious number-crunching and offline processing capability.
+### Frontend
+- **Framework**: React 18 with TypeScript
+- **Build Tool**: Vite
+- **Styling**: Tailwind CSS
+- **State Management**: Zustand
+- **API Client**: Axios
+- **Routing**: React Router DOM
+- **Visualization**: HTML5 Canvas API (custom implementations for high-performance waveform/spectrogram rendering)
 
-## 🧠 DSP Theory & Phase Vocoder Architecture
+### Backend
+- **Framework**: Django 4.2 with Django REST Framework (DRF)
+- **Audio Processing**: NumPy, SciPy
+- **Audio File Handling**: SoundFile, PyDub
+- **Testing**: Pytest
 
-### Short-Time Fourier Transform (STFT)
-The core of our processing pipeline uses the STFT to decompose signals into overlapping windows. This localized frequency analysis allows us to separate magnitude and phase across time frames. We support multiple windowing functions (Hann, Hamming, Blackman).
+---
 
-### Phase Vocoder: Time-Stretching
-To stretch a signal in time without altering pitch:
-1. We compute the STFT (analysis frames).
-2. We resynthesize with a different hop size (synthesis frames).
-3. **Phase Propagation:** Because the hop size changes, we cannot simply use the original phase. We estimate the instantaneous frequency from phase differences between successive frames, unwrap the phase, and construct a new coherent phase sequence for the output.
+## Directory & File Structure Guide
 
-### Phase Vocoder: Pitch-Shifting
-Pitch shifting is achieved via a two-step process:
-1. Time-stretch the audio by a factor alpha = 2^(semitones/12).
-2. Resample (sample rate convert) the stretched audio back to the original length, which effectively shifts the pitch without altering the duration.
+This section explains every key file in the project. If you need to understand where a piece of logic lives or what a file does, refer to this guide.
 
-### Phase Locking (Identity Phase Locking)
-A common artifact of the standard phase vocoder is "phasiness" or loss of transient sharpness. To mitigate this, we implement **Identity Phase Locking**. We lock the phases of adjacent bins to the phase of local magnitude peaks, preserving the vertical phase coherence of transients and resulting in a much crisper, more natural sound.
+### `/backend/` (Django Server & DSP Engine)
 
-## 📚 Signals & Systems Course Mapping
+The backend is built with Django and performs all the heavy lifting for DSP algorithms.
 
-This project maps directly to core concepts in an undergraduate Signals and Systems curriculum:
+#### `backend/api/` (Django App)
+Handles HTTP requests, file uploads, and orchestrates the DSP processing.
+- `models.py`: Defines the database schema using Django ORM. Contains `AudioProject`, `AudioFile`, and `EffectPreset`.
+- `serializers.py`: DRF serializers to convert complex models (like `AudioFile`) into JSON for the frontend.
+- `urls.py`: Defines the API endpoints (e.g., `/api/files/upload/`, `/api/process/pitch-shift/`).
+- `views.py`: Contains the view functions handling the API routes. Uses DSP modules to process audio data and handles saving/reading files.
+- `audio_utils.py`: Helper functions for loading and saving `.wav` files using `soundfile` and `pydub`.
 
-| Component | Concept | Application in this Project |
-|-----------|---------|-----------------------------|
-| **Fourier Analysis** | Discrete Fourier Transform (DFT), FFT | Frequency analysis of audio; `backend/dsp/fft_processor.py` |
-| **LTI Systems** | Impulse Response, Convolution | Effect processing (Reverb, Filters) |
-| **Sampling Theorem** | Nyquist Rate, Aliasing, Resampling | Naive pitch shifting via interpolation |
-| **Windowing** | Spectral Leakage, Spectral Smearing | STFT window choice (Hann vs Rectangular) |
-| **Phase & Group Delay** | Instantaneous Frequency, Phase Unwrapping | Phase accumulation in the Vocoder |
+#### `backend/config/` (Django Configuration)
+- `settings.py`: Core Django settings (database configuration, CORS headers, installed apps, static/media file directories).
+- `urls.py`: The root URL configuration, routing `/api/` to `api.urls`.
+- `wsgi.py` / `asgi.py`: Entry points for WSGI/ASGI web servers.
 
-## 🛠️ Setup Instructions
+#### `backend/dsp/` (Core DSP Library)
+This is the heart of the signal processing engine. It relies heavily on `numpy`.
+- `stft.py`: Implements the Short-Time Fourier Transform (`compute_stft`) and Weighted Overlap-Add (WOLA) synthesis (`reconstruct_signal_wola`).
+- `fft_processor.py`: Wraps `scipy.fft` to compute the FFT, IFFT, magnitude spectrum, phase spectrum, and frequency axis.
+- `phase_vocoder.py`: The core algorithm for time-stretching and pitch-shifting. Implements instantaneous frequency estimation, phase accumulation, and phase locking.
+- `resampling.py`: Implements `naive_resample` using linear interpolation (changes both pitch and time).
+- `effects.py`: Implements various audio effects (`AudioEffect` base class). Includes filters (LowPass, HighPass), delays (Echo, Reverb), modulations (RingModulation), and distortion.
+- `analysis.py`: Functions to calculate signal features like RMS energy, zero-crossing rate, spectral centroid, and frequency bandwidth.
+- `generator.py`: Generates primitive audio signals (sine, square, sawtooth, noise) for testing or synthesis.
+- `windowing.py`: Generates different window functions (Hann, Hamming, Blackman, Rectangular).
+
+#### `backend/tests/`
+- `test_dsp.py`, `test_effects.py`: Pytest suites verifying that the math and DSP logic (like the phase vocoder shifting pitch correctly) actually work.
+
+---
+
+### `/frontend/` (React SPA)
+
+The frontend is a single-page application built with Vite and React.
+
+#### `frontend/src/` (Source Root)
+- `App.tsx`: The root component, sets up the `AppShell` and routing layout.
+- `main.tsx`: React entry point, mounts the app to the DOM.
+- `index.css`: Global CSS, contains Tailwind directives and custom CSS (like custom styled range sliders).
+
+#### `frontend/src/api/`
+- `client.ts`: Configures the Axios instance (`apiClient`) with the correct base URL pointing to the Django backend.
+
+#### `frontend/src/store/`
+- `useAudioStore.ts`: Global state management using Zustand. Holds the currently loaded audio file, playback state, effect chain, analysis data, and handles dispatching state updates across the app without prop drilling.
+
+#### `frontend/src/pages/`
+The main routed views of the application:
+- `Studio.tsx`: The main workspace. Combines upload, visualization, and effect processing.
+- `Effects.tsx`: A visual rack to build and manage custom DSP effect chains (e.g., adding Reverb -> Pitch Shift).
+- `Compare.tsx`: Allows users to compare the naive resampling approach against the advanced Phase Vocoder approach visually and audibly.
+- `Theory.tsx`: An educational hub explaining the math (Fourier Transforms, STFT, WOLA) and containing interactive simulations.
+- `Signals.tsx`: A page dedicated to generating and analyzing pure primitive signals (sine, square).
+- `Dashboard.tsx` & `Settings.tsx`: Basic routing pages for project management and app configuration.
+
+#### `frontend/src/hooks/`
+Custom React hooks encapsulating complex logic:
+- `useAudioPlayer.ts` / `useNativeAudioPlayer.ts`: Handles the HTML5 `<audio>` element lifecycle, play/pause, seeking, and updating the global time state.
+- `useAudioEngine.ts`: Higher-level orchestration hook for the audio context.
+- `useWaveformCanvas.ts`: Hook that handles efficiently drawing massive arrays of audio samples onto an HTML `<canvas>`.
+- `useAnimationLoop.ts`: `requestAnimationFrame` wrapper for smooth UI updates.
+
+#### `frontend/src/types/`
+- `index.ts`: TypeScript interfaces defining the shape of `AudioFile`, `WaveformData`, `SpectrogramData`, `Effect`, etc., ensuring type safety across the frontend.
+
+#### `frontend/src/components/`
+Modular UI building blocks, grouped by feature:
+
+- **`/audio/`**: Components for handling audio playback and uploading.
+  - `AudioPlayer.tsx` / `NativeAudioPlayer.tsx`: The custom transport controls (play, pause, timeline slider).
+  - `UploadZone.tsx`: Drag-and-drop file uploader.
+  - `WaveformViewer.tsx`: Uses the canvas hooks to draw the signal waveform.
+
+- **`/visualization/`**: Complex data visualizations.
+  - `SpectrogramView.tsx`: Renders 2D frequency over time using a heatmap canvas.
+  - `SpectrumAnalyzer.tsx`: Renders the 1D frequency magnitude (FFT).
+
+- **`/processing/`**:
+  - `EffectChain.tsx` & `ProcessingControls.tsx`: UI for adding, reordering, and tweaking parameters of DSP effects.
+
+- **`/compare/`**:
+  - `ComparisonSignalGraphs.tsx` & `ComparisonView.tsx`: Specialized visualizers that stack naive vs phase vocoder waveforms side-by-side.
+
+- **`/theory/`**:
+  - Educational components (`ConceptCard.tsx`, `EquationCard.tsx`) and an interactive questionnaire (`Questionnaire.tsx`, `questionsData.ts`).
+  - **`/simulations/`**: Interactive visual simulations explaining DSP concepts (e.g., `FourierSimulation.tsx`, `PhaseWheelSimulation.tsx`, `PitchShiftSimulation.tsx`).
+
+- **`/ui/`**: Reusable generic components.
+  - `Button.tsx`, `Card.tsx`, `Slider.tsx`, `ProgressBar.tsx`, `Select.tsx`, etc.
+
+---
+
+## 🚀 Setup Instructions
 
 ### Prerequisites
 - Python 3.10+
@@ -85,211 +161,3 @@ This project maps directly to core concepts in an undergraduate Signals and Syst
    npm run dev
    ```
    The application will run at `http://localhost:5173/`
-
-## 📂 Project Structure
-
-```text
-.
-├── backend/
-│   ├── api/                  # Django views, models, serializers
-│   ├── dsp/                  # Core DSP algorithms (NumPy/SciPy)
-│   │   ├── phase_vocoder.py  # Advanced Phase Vocoder implementation
-│   │   ├── effects.py        # Extensible effect chain system
-│   │   ├── generator.py      # Primitive signal generator
-│   │   └── ...
-│   ├── core/                 # Django settings
-│   └── media/                # Uploaded and processed audio files
-└── frontend/
-    ├── src/
-    │   ├── api/              # Axios client mapping to backend API
-    │   ├── components/       # UI components (Audio, Visualization, UI)
-    │   ├── hooks/            # Custom React hooks (useAudioEngine)
-    │   ├── pages/            # Application views (Studio, Compare, etc.)
-    │   └── store/            # Zustand state management
-    └── index.html
-```
-
----
-
-## 📐 Detailed Theoretical Background
-
-### 1. Fourier Series vs Fourier Transform
-
-**Fourier Series** represents periodic signals as sums of discrete harmonics:
-```
-x(t) = Σ_k a_k e^(jkω₀t)
-```
-As the period T → ∞, the discrete harmonics approach a continuous spectrum — the **Fourier Transform**.
-
-**Fourier Transform** (course convention):
-```
-Analysis:  X(jω) = ∫ x(t) e^(−jωt) dt
-Synthesis: x(t) = (1/2π) ∫ X(jω) e^(jωt) dω
-```
-
----
-
-### 2. From FT to DFT to FFT
-
-Because audio is sampled (discrete), we use the **Discrete Fourier Transform (DFT)**:
-```
-X[k] = Σ_{n=0}^{N-1} x[n] e^(−j2πkn/N)    k = 0, 1, …, N−1
-```
-The **FFT** computes the DFT in O(N log N) rather than O(N²). Frequency axis:
-```
-f_k = k · Fs / N (Hz)      ω_k = 2π · k / N (radians/sample)
-f_Nyquist = Fs / 2
-```
-
----
-
-### 3. Magnitude and Phase
-
-Each DFT output is complex:
-```
-X[k] = |X[k]| · e^(jφ[k])
-```
-- **|X[k]|** — magnitude spectrum (amplitude of frequency component k)
-- **φ[k] = ∠X[k]** — phase spectrum (timing offset of that component)
-
-For a real signal the spectrum has **conjugate symmetry**: `X[N−k] = X*[k]` → even magnitude, odd phase.
-
----
-
-### 4. Fourier Transform Properties Used
-
-#### Time-Shifting Property
-```
-x(t − t₀) ↔ X(jω) · e^(−jω·t₀)
-```
-A time shift leaves magnitude unchanged but rotates phase by −ω·t₀. The Phase Vocoder uses this: when a frame is moved to a new synthesis position, its phase must be updated to reflect the positional change.
-
-#### Time-Scaling Property
-```
-x(αt) ↔ (1/|α|) X(j·ω/α)
-```
-Time compression (α > 1) shifts all frequency components to higher frequencies (pitch up) and reduces duration simultaneously. This is exactly what naive resampling does — both pitch and duration change together.
-
----
-
-### 5. Phase Vocoder Algorithm — Step by Step
-
-#### Step 1 — STFT Analysis
-For each analysis frame m, compute the windowed FFT:
-```
-X[m,k] = FFT(x_windowed[m])
-magnitude[m,k] = |X[m,k]|
-phi_curr[m,k]  = ∠X[m,k]
-```
-
-#### Step 2 — Phase Difference
-```
-Δφ[k] = phi_curr[k] − phi_prev[k]
-```
-
-#### Step 3 — Remove Expected Advance
-Expected phase advance over Ha samples at bin k:
-```
-expected[k] = ω_k · Ha = (2π·k/N) · Ha
-residual[k] = wrap(Δφ[k] − expected[k])   → range (−π, π]
-```
-
-#### Step 4 — Instantaneous Frequency
-```
-ω_inst[k] = (2π·k/N) + residual[k] / Ha
-```
-This is the true frequency of the component near bin k.
-
-#### Step 5 — Accumulate Synthesis Phase
-```
-φ_synth[m,k] = φ_synth[m−1,k] + ω_inst[k] · Hs
-```
-Where `Hs` = synthesis hop. This ensures continuous phase evolution.
-
-#### Step 6 — Reconstruct Modified Spectrum
-```
-Y[m,k] = magnitude[m,k] · exp(j · φ_synth[m,k])
-```
-
-#### Step 7 — IFFT + Weighted Overlap-Add (WOLA)
-```
-y_frame[m] = IFFT(Y[m,:])   (apply synthesis window)
-output[n]  = Σ_m y_frame[m][n − m·Hs] / Σ_m w²[n − m·Hs]
-```
-
----
-
-### 6. Time Stretching
-
-Control the output duration by changing the relationship between Ha and Hs:
-```
-Hs = Ha × stretch_factor
-```
-- `stretch_factor > 1` → **longer** output (frames placed further apart)
-- `stretch_factor < 1` → **shorter** output
-- Pitch is approximately preserved (spectral content of each frame is unchanged)
-
----
-
-### 7. Pitch Shifting
-
-Pitch shift without changing duration:
-```
-pitch_factor = 2^(semitones / 12)
-
-Step 1: Time-stretch with stretch_factor = 1 / pitch_factor
-Step 2: Resample back to original length
-```
-Examples:
-```
-+12 semitones → pitch_factor = 2.0 (octave up)
--12 semitones → pitch_factor = 0.5 (octave down)
- +7 semitones → pitch_factor ≈ 1.498 (perfect fifth)
-```
-
----
-
-### 8. Naive Resampling (Baseline Comparison)
-
-Simple resampling is equivalent to x(α·t):
-```
-pitch_factor > 1 → pitch ↑, duration ↓
-pitch_factor < 1 → pitch ↓, duration ↑
-```
-Both pitch and duration change simultaneously — this is the fundamental limitation that the Phase Vocoder overcomes.
-
----
-
-### 9. How Theory Maps to Implementation
-
-| Course Concept | Implementation Location |
-|---|---|
-| Fourier Transform X(jω) | `backend/dsp/fft_processor.py` — `compute_fft()` |
-| Magnitude spectrum \|X[k]\| | `fft_processor.magnitude_spectrum()` |
-| Phase spectrum ∠X[k] | `fft_processor.phase_spectrum()` |
-| Time-shifting property | Phase accumulation in `phase_vocoder.time_stretch()` |
-| Time-scaling property | `dsp/resampling.naive_resample()` (demonstration baseline) |
-| Windowing / Hann window | `dsp/windowing.py` — `get_window()` |
-| STFT | `dsp/stft.py` — `compute_stft()`, `reconstruct_signal_wola()` |
-| Instantaneous frequency | `phase_vocoder.estimate_instantaneous_frequency()` |
-| Phase accumulation | Phase loop in `phase_vocoder.time_stretch()` |
-| IFFT (synthesis) | `fft_processor.compute_ifft()` |
-| Overlap-Add (WOLA) | `stft.reconstruct_signal_wola()` |
-| Phase locking | `phase_vocoder.time_stretch_with_phase_locking()` |
-| Frequency axis f_k = k·Fs/N | `fft_processor.frequency_axis()` |
-
----
-
-## 🧪 Running DSP Tests
-
-```bash
-cd backend
-python -m pytest tests/ -v
-```
-
-**Tests cover:**
-1. FFT correctly identifies dominant frequency of a 440 Hz sine wave
-2. Pitch shift +12 semitones doubles dominant frequency (440 → 880 Hz)
-3. Pitch shift −12 semitones halves dominant frequency (440 → 220 Hz)
-4. Time stretching by 1.5× produces output ≈ 1.5× input duration, pitch preserved
-5. Naive resampling changes both pitch and duration; Phase Vocoder changes only pitch

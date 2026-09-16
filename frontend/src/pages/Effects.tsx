@@ -245,7 +245,7 @@ export default function Effects() {
   const streamUrl = selectedFile ? getStreamUrl(selectedFile.id) : null;
 
   return (
-    <div className="max-w-6xl mx-auto space-y-6 animate-in fade-in duration-300 select-none pb-12">
+    <div className="max-w-6xl mx-auto space-y-6 animate-in fade-in duration-300 select-none pb-48">
       {/* Header Bar */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-[rgba(38,33,28,0.08)] pb-4">
         <div>
@@ -448,7 +448,7 @@ export default function Effects() {
                 </Button>
 
                 {addMenuOpen && (
-                  <div className="absolute left-0 bottom-full mb-2 w-72 bg-[#f4f3ee] rounded-[20px] shadow-lg border border-[rgba(38,33,28,0.12)] p-2 z-40 space-y-1">
+                  <div className="absolute left-0 top-full mt-2 w-72 max-h-[350px] overflow-y-auto bg-[#f4f3ee] rounded-[20px] shadow-lg border border-[rgba(38,33,28,0.12)] p-2 z-40 space-y-1">
                     <div className="px-3 py-1.5 text-[11px] font-semibold text-[#79716b] uppercase tracking-wider">
                       Select Filter Module
                     </div>
