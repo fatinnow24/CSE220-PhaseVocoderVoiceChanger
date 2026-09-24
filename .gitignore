@@ -87,3 +87,6 @@ scripts/
 .commandcode/
 .gemini/__pycache__/
 *.pyc
+
+# Ignore presentation files
+presentation/
