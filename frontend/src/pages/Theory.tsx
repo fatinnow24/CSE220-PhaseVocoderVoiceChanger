@@ -1,24 +1,27 @@
 import { useState, useCallback } from 'react';
+import Latex from '../components/ui/Latex';
 
 // Layout & navigation
 import TheoryHero from '../components/theory/TheoryHero';
 import TheoryNav from '../components/theory/TheoryNav';
 import TheorySection from '../components/theory/TheorySection';
 
-// Shared display components
-import ConceptCard from '../components/theory/ConceptCard';
-import EquationCard, { Eq } from '../components/theory/EquationCard';
-import ImplementationCard from '../components/theory/ImplementationCard';
-import ConceptMappingTable from '../components/theory/ConceptMappingTable';
+// Plain narrative primitives (no card chrome)
+import {
+  Prose,
+  DisplayMath,
+  Footnote,
+  ModuleHeader,
+  ModuleClose,
+} from '../components/theory/Narrative';
 
-// Simulations — Batch A
-import SamplingSimulation from '../components/theory/simulations/SamplingSimulation';
+// Simulations — Batch A (Foundations & Spectral)
 import FourierSimulation from '../components/theory/simulations/FourierSimulation';
 import DFTvsFFTSimulation from '../components/theory/simulations/DFTvsFFTSimulation';
 import MagnitudePhaseSimulation from '../components/theory/simulations/MagnitudePhaseSimulation';
 import WindowingSimulation from '../components/theory/simulations/WindowingSimulation';
 
-// Simulations — Batch B
+// Simulations — Batch B (Phase Vocoder, Resampling & Reconstruction)
 import STFTSimulation from '../components/theory/simulations/STFTSimulation';
 import PhaseVocoderSimulation from '../components/theory/simulations/PhaseVocoderSimulation';
 import PhaseWheelSimulation from '../components/theory/simulations/PhaseWheelSimulation';
@@ -29,606 +32,432 @@ import ConvolutionSimulation from '../components/theory/simulations/ConvolutionS
 import WOLASimulation from '../components/theory/simulations/WOLASimulation';
 
 // Complex visualizations
-import TheoryRoadmap from '../components/theory/TheoryRoadmap';
-import ConceptMap from '../components/theory/ConceptMap';
 import PipelineVisualization from '../components/theory/PipelineVisualization';
 import FinalSummary from '../components/theory/FinalSummary';
 
-// Questionnaire
-import Questionnaire from '../components/theory/questionnaire/Questionnaire';
+// Foundations — plain theoretical narrative (replaces block cards)
+import { FoundationsPart, SamplingPart } from '../components/theory/foundations/FoundationsTheory';
 
-function scrollToSection(id: string) {
+function scrollToModule(id: string) {
   const el = document.getElementById(id);
   if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
 }
 
 export default function Theory() {
-  const [activeSection, setActiveSection] = useState('foundations');
+  const [activeSection, setActiveSection] = useState('sub-foundations');
 
-  const handleVisible = useCallback((id: string) => {
+  const handleSectionVisible = useCallback((id: string) => {
     setActiveSection(id);
   }, []);
 
-  const handleNavigate = useCallback((id: string) => {
-    scrollToSection(id);
-    setActiveSection(id);
-  }, []);
-
-  const handleExplore = useCallback(() => {
-    scrollToSection('foundations');
+  const handleNavigate = useCallback((id?: string) => {
+    const target = id || 'sub-foundations';
+    scrollToModule(target);
+    setActiveSection(target);
   }, []);
 
   return (
-    <div className="max-w-5xl mx-auto animate-in fade-in duration-500">
-      {/* Hero */}
-      <TheoryHero onExplore={handleExplore} />
+    <div className="max-w-5xl mx-auto animate-in fade-in duration-500 pb-20">
+      {/* Animated Hero Header */}
+      <TheoryHero />
 
-      {/* Sticky navigation */}
+      {/* Sticky Concept Navbar */}
       <TheoryNav activeSection={activeSection} onNavigate={handleNavigate} />
 
-      {/* Main content */}
-      <div className="space-y-16 pt-10 pb-24">
+      {/* Structured Curriculum Chapters */}
+      <div className="space-y-8 pt-6">
 
-        {/* ── 01 FOUNDATIONS ─────────────────────────────────────── */}
-        <TheorySection
-          id="foundations"
-          index="01"
-          title="Signals & Systems Foundations"
-          subtitle="The mathematical language underlying digital audio processing."
-          whyCard="Every audio processing operation in this project — from reading a WAV file to reconstructing pitch-shifted output — depends on the foundational concepts of continuous and discrete signals, linear systems, and the relationship between time and frequency domains."
-          initiallyVisible={true}
-          onVisible={handleVisible}
-        >
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-6">
-            <ConceptCard
-              concept="Continuous-Time Signal"
-              math="x(t), t ∈ ℝ"
-              description="A function defined for every instant of time. Real-world audio is a continuous pressure wave. The Fourier Transform operates on continuous signals."
-              tags={['Analog', 'Theory']}
-            />
-            <ConceptCard
-              concept="Discrete-Time Signal"
-              math="x[n], n ∈ ℤ"
-              description="A sequence of values indexed by integers. After analog-to-digital conversion, audio becomes a discrete signal. All DSP algorithms operate on discrete sequences."
-              tags={['Digital', 'Implementation']}
-            />
-            <ConceptCard
-              concept="LTI System"
-              math="y[n] = T{x[n]}"
-              description="A Linear Time-Invariant system satisfies superposition and time-invariance. Filters, echo, and reverb are LTI. The phase vocoder itself is NOT LTI — it is time-varying."
-              tags={['LTI', 'Systems']}
-              variant="highlight"
-            />
-            <ConceptCard
-              concept="Frequency"
-              math="f (Hz) = cycles per second"
-              description="Determines the perceived pitch of a tone. The DFT bin k corresponds to frequency f_k = k·Fs/N, where Fs is the sampling rate and N is the FFT size."
-              tags={['Fundamental']}
-            />
-            <ConceptCard
-              concept="Phase"
-              math="φ = initial angle of a sinusoid"
-              description="Determines where in its cycle a sinusoid starts. Phase encodes temporal position. In the phase vocoder, tracking phase evolution across frames is the core operation."
-              tags={['Fundamental', 'Critical']}
-              variant="highlight"
-            />
-            <ConceptCard
-              concept="Amplitude"
-              math="A = peak magnitude"
-              description="Determines the loudness/intensity of a component. The magnitude spectrum |X[k]| captures amplitude per frequency bin."
-              tags={['Fundamental']}
-            />
-          </div>
-
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-            <EquationCard label="Fourier Transform (continuous)">
-              {'X(jω) = ∫₋∞^∞ x(t)·e^(−jωt) dt'}
-            </EquationCard>
-            <EquationCard label="Inverse Fourier Transform">
-              {'x(t) = (1/2π) ∫₋∞^∞ X(jω)·e^(jωt) dω'}
-            </EquationCard>
-          </div>
-        </TheorySection>
-
-        {/* ── 02 SAMPLING ─────────────────────────────────────────── */}
-        <TheorySection
-          id="sampling"
-          index="02"
-          title="Sampling & Discrete-Time Signals"
-          subtitle="Converting continuous audio into a discrete sequence the computer can process."
-          whyCard="Audio files are discrete sequences of numbers. The phase vocoder reads these samples and processes them at integer indices. Understanding sampling frequency, Nyquist, and aliasing explains why the project works correctly only within the Nyquist band."
-          onVisible={handleVisible}
-        >
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-6">
-            <EquationCard label="Nyquist Frequency">
-              {'f_N = Fs / 2'}
-              <br />
-              <span className="text-body-sm text-on-surface-variant">Maximum representable frequency at sampling rate Fs</span>
-            </EquationCard>
-            <EquationCard label="Frequency Bin">
-              {'f_k = k · Fs / N'}
-              <br />
-              <span className="text-body-sm text-on-surface-variant">Frequency in Hz corresponding to FFT bin k</span>
-            </EquationCard>
-          </div>
-
-          <SamplingSimulation />
-
-          <div className="mt-6">
-            <ImplementationCard
-              file="dsp/fft_processor.py"
-              fn="frequency_axis()"
-              description="Returns the frequency axis for N bins at a given sample rate using numpy.fft.rfftfreq. Default Fs=44100 Hz used by the backend."
-            />
-          </div>
-        </TheorySection>
-
-        {/* ── 03 FOURIER ──────────────────────────────────────────── */}
-        <TheorySection
-          id="fourier"
-          index="03"
-          title="Fourier Analysis"
-          subtitle="Decomposing a signal into its sinusoidal frequency components."
-          whyCard="The phase vocoder requires a frequency-domain representation of each audio frame. Fourier analysis is the mathematical bridge from a waveform to the per-bin magnitude and phase data that the algorithm manipulates."
-          onVisible={handleVisible}
-        >
-          <div className="mb-6">
-            <EquationCard label="Discrete Fourier Transform (DFT)" description="The DFT computes the complex spectrum X[k] for each frequency bin k. The FFT is an efficient algorithm for computing the DFT.">
-              {'X[k] = Σₙ₌₀^(N−1) x[n] · e^(−j2πkn/N)'}
-            </EquationCard>
-          </div>
-
-          <FourierSimulation />
-
-          <div className="mt-6 grid grid-cols-1 sm:grid-cols-3 gap-3">
-            <div className="rounded-2xl bg-surface-container-low p-4">
-              <p className="text-label-caps text-on-surface-variant mb-1">n</p>
-              <p className="text-body-sm text-on-surface">Sample index (0 to N−1)</p>
-            </div>
-            <div className="rounded-2xl bg-surface-container-low p-4">
-              <p className="text-label-caps text-on-surface-variant mb-1">k</p>
-              <p className="text-body-sm text-on-surface">Frequency bin index (0 to N−1)</p>
-            </div>
-            <div className="rounded-2xl bg-surface-container-low p-4">
-              <p className="text-label-caps text-on-surface-variant mb-1">N</p>
-              <p className="text-body-sm text-on-surface">FFT size. Default: 2048 in this project</p>
-            </div>
-          </div>
-        </TheorySection>
-
-        {/* ── 04 DFT & FFT ────────────────────────────────────────── */}
-        <TheorySection
-          id="dft-fft"
-          index="04"
-          title="DFT & FFT"
-          subtitle="Why the Fast Fourier Transform is essential for real-time audio processing."
-          whyCard="The project uses numpy.fft.fft() — an FFT algorithm. For N=2048 samples, the FFT computes only ~22,528 operations instead of ~4,194,304 for a naive DFT. This speedup makes per-frame FFT computationally practical."
-          onVisible={handleVisible}
-        >
-          <DFTvsFFTSimulation />
-
-          <div className="mt-6">
-            <ImplementationCard
-              file="dsp/fft_processor.py"
-              fn="compute_fft()"
-              description="Wraps numpy.fft.fft(frame). Called for every STFT frame. At N=2048 and Ha=512, this runs hundreds of times per second of audio."
-            />
-          </div>
-        </TheorySection>
-
-        {/* ── 05 MAGNITUDE & PHASE ────────────────────────────────── */}
-        <TheorySection
-          id="magnitude-phase"
-          index="05"
-          title="Magnitude and Phase"
-          subtitle="The two components of a complex spectrum that together fully describe a signal."
-          whyCard="The phase vocoder separates magnitude and phase. Magnitude is preserved across synthesis frames (the frequency content stays the same). Phase is tracked and accumulated across frames to maintain temporal coherence. Without phase, reconstruction is incoherent."
-          onVisible={handleVisible}
-        >
-          <div className="mb-6">
-            <EquationCard label="Polar decomposition of complex spectrum" description="Every DFT bin is a complex number decomposed into magnitude (how much) and phase (when).">
-              {'X[k] = |X[k]| · e^(jφ[k])'}
-            </EquationCard>
-          </div>
-
-          <MagnitudePhaseSimulation />
-
-          <div className="mt-6 grid grid-cols-1 sm:grid-cols-2 gap-4">
-            <ImplementationCard
-              file="dsp/fft_processor.py"
-              fn="magnitude_spectrum()"
-              description="Returns np.abs(spectrum) — the magnitude of each complex bin."
-            />
-            <ImplementationCard
-              file="dsp/fft_processor.py"
-              fn="phase_spectrum()"
-              description="Returns np.angle(spectrum) — the phase angle (radians) of each complex bin."
-            />
-          </div>
-        </TheorySection>
-
-        {/* ── 06 WINDOWING ────────────────────────────────────────── */}
-        <TheorySection
-          id="windowing"
-          index="06"
-          title="Windowing & Spectral Leakage"
-          subtitle="Controlling how a finite signal frame interacts with Fourier analysis."
-          whyCard="The STFT divides audio into finite frames. A finite rectangular frame implicitly multiplies the signal by a rectangular window — whose DFT has large side lobes, causing spectral leakage. Smooth windows (Hann, Hamming, Blackman) reduce side lobes at the cost of a wider main lobe."
-          onVisible={handleVisible}
-        >
-          <div className="mb-6">
-            <EquationCard label="Hann Window" description="The default window in this project. Smooth, well-balanced leakage properties.">
-              {'w[n] = 0.5 · (1 − cos(2πn / (N−1)))'}
-            </EquationCard>
-          </div>
-
-          <WindowingSimulation />
-
-          <div className="mt-6">
-            <ImplementationCard
-              file="dsp/windowing.py"
-              fn="get_window()"
-              description="Returns the window array for types: hann (default), hamming, blackman, rectangular. Called inside compute_stft() and reconstruct_signal_wola()."
-            />
-          </div>
-        </TheorySection>
-
-        {/* ── 07 STFT ─────────────────────────────────────────────── */}
-        <TheorySection
-          id="stft"
-          index="07"
-          title="Short-Time Fourier Transform"
-          subtitle="Localised frequency analysis — the core analysis tool of the phase vocoder."
-          whyCard="A single FFT of the entire signal gives a global frequency view but loses all timing information. The STFT applies FFT to short overlapping frames, giving a time-indexed sequence of local spectra — the time-frequency representation the phase vocoder needs."
-          onVisible={handleVisible}
-        >
-          <div className="mb-6">
-            <EquationCard label="STFT" description="The windowed FFT of frame m. Analysis hop Ha advances the window by Ha samples each frame.">
-              {'STFT{x}(m,k) = Σₙ x[n] · w[n−m·Ha] · e^(−j2πkn/N)'}
-            </EquationCard>
-          </div>
-
-          <STFTSimulation />
-
-          <div className="mt-6 grid grid-cols-1 sm:grid-cols-2 gap-4">
-            <ImplementationCard
-              file="dsp/stft.py"
-              fn="create_frames()"
-              description="Extracts overlapping frames using stride indexing. Returns shape (n_frames, N)."
-            />
-            <ImplementationCard
-              file="dsp/stft.py"
-              fn="compute_stft()"
-              description="Applies get_window() then compute_fft() to each frame. Returns STFT matrix, magnitude array, and phase array."
-            />
-          </div>
-        </TheorySection>
-
-        {/* ── 08 PHASE VOCODER ────────────────────────────────────── */}
-        <TheorySection
-          id="phase-vocoder"
-          index="08"
-          title="The Phase Vocoder"
-          subtitle="Coherent time-scale modification via frame-by-frame phase accumulation."
-          whyCard="The phase vocoder is the heart of this project. It modifies the synthesis hop Hs relative to analysis hop Ha to stretch or compress time. Without careful phase tracking across frames, the output sounds phasey and incoherent. The algorithm works entirely in the frequency domain."
-          onVisible={handleVisible}
-        >
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-6">
-            <EquationCard label="Instantaneous frequency" description="Estimates the true frequency of bin k from its phase advance.">
-              {'ω_inst[k] = ω_k + wrap(Δφ[k] − ω_k · Ha)'}
-            </EquationCard>
-            <EquationCard label="Phase accumulation" description="Builds a coherent phase for synthesis frame m.">
-              {'φ_synth[m,k] = φ_synth[m−1,k] + ω_inst[k] · (Hs/Ha)'}
-            </EquationCard>
-          </div>
-
-          <PhaseVocoderSimulation />
-
-          <div className="mt-6">
-            <ImplementationCard
-              file="dsp/phase_vocoder.py"
-              fn="time_stretch()"
-              description="Phase vocoder time stretching. Default: N_FFT=2048, Ha=512. Hs = round(Ha × stretch_factor). RMS-normalized output."
-            />
-          </div>
-        </TheorySection>
-
-        {/* ── 09 PHASE DIFFERENCE & UNWRAPPING ────────────────────── */}
-        <TheorySection
-          id="phase-vocoder"
-          index="09"
-          title="Phase Difference & Phase Wrapping"
-          subtitle="How phase evolves between frames — and why wrapping must be handled."
-          whyCard="Phase is defined modulo 2π. When a bin's phase crosses ±π between frames, the raw difference jumps by ≈2π. The wrap_phase() function corrects this jump to get the true residual — which is added to the expected phase advance to estimate instantaneous frequency."
-          onVisible={handleVisible}
-        >
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-6">
-            <EquationCard label="Phase difference">
-              {'Δφ[k] = φ_curr[k] − φ_prev[k]'}
-            </EquationCard>
-            <EquationCard label="Wrap formula (from fft_processor.py)">
-              {'wrap(φ) = (φ + π) mod 2π − π'}
-            </EquationCard>
-          </div>
-
-          <PhaseWheelSimulation />
-
-          <div className="mt-6">
-            <ImplementationCard
-              file="dsp/fft_processor.py"
-              fn="wrap_phase()"
-              description="Implements (phase + π) % (2π) − π using numpy, called inside estimate_instantaneous_frequency()."
-            />
-          </div>
-        </TheorySection>
-
-        {/* ── 11 TIME STRETCHING ──────────────────────────────────── */}
-        <TheorySection
-          id="pitch-shifting"
-          index="11"
-          title="Time Stretching"
-          subtitle="Changing signal duration while preserving pitch."
-          whyCard="Time stretching is the first step of pitch shifting. By using Hs = Ha × stretch_factor, synthesis frames are spaced further (or closer) than analysis frames, changing total output length while spectral content stays the same."
-          onVisible={handleVisible}
-        >
-          <EquationCard label="Synthesis hop" description="The key relationship: Hs controls duration, not pitch." compact>
-            {'Hs = Ha × stretch_factor  (default Ha = 512)'}
-          </EquationCard>
-
-          <div className="mt-6">
-            <TimeStretchSimulation />
-          </div>
-
-          <div className="mt-6">
-            <ImplementationCard
-              file="dsp/phase_vocoder.py"
-              fn="time_stretch()"
-              description="Called internally by pitch_shift() with stretch_factor = 1/pitch_factor. Also exposed as TimeStretchEffect in effects.py."
-            />
-          </div>
-        </TheorySection>
-
-        {/* ── 12 PITCH SHIFTING ───────────────────────────────────── */}
-        <TheorySection
-          id="pitch-shifting"
-          index="12"
-          title="Pitch Shifting"
-          subtitle="Independent pitch modification without changing duration."
-          whyCard="Pitch shifting = time stretch + resampling. Time stretching by 1/p gives a signal with the original pitch but wrong duration. Resampling by p then restores the original duration while shifting pitch. This two-step pipeline decouples pitch from duration."
-          onVisible={handleVisible}
-        >
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-6">
-            <EquationCard label="Pitch factor from semitones">
-              {'p = 2^(s / 12)'}
-              <br />
-              <span className="text-body-sm text-on-surface-variant">+12 semitones → p=2 (octave up) | −12 → p=0.5 (octave down)</span>
-            </EquationCard>
-            <EquationCard label="Pitch shift pipeline">
-              {'stretch by (1/p) → resample by p'}
-              <br />
-              <span className="text-body-sm text-on-surface-variant">Duration preserved; pitch shifted by factor p</span>
-            </EquationCard>
-          </div>
-
-          <PitchShiftSimulation />
-
-          <div className="mt-6 grid grid-cols-1 sm:grid-cols-2 gap-4">
-            <ImplementationCard
-              file="dsp/phase_vocoder.py"
-              fn="pitch_shift()"
-              description="Calls time_stretch(signal, sr, 1/pitch_factor) then naive_resample(stretched, sr, pitch_factor). Supports phase_locking=True for better quality."
-            />
-            <ImplementationCard
-              file="dsp/resampling.py"
-              fn="semitones_to_pitch_factor()"
-              description="Returns 2^(semitones/12). Used to convert the UI semitone slider value to the linear pitch ratio."
-            />
-          </div>
-        </TheorySection>
-
-        {/* ── 13 RESAMPLING ───────────────────────────────────────── */}
-        <TheorySection
-          id="resampling"
-          index="13"
-          title="Naive Resampling & Interpolation"
-          subtitle="How resampling couples pitch and duration — and why it's used deliberately."
-          whyCard="Naive resampling changes the number of samples, coupling pitch and duration. When used as the final step of pitch_shift() after time stretching, this coupling is exploited deliberately: the time-stretched signal already has the correct spectral content; resampling snaps it back to the original sample count."
-          onVisible={handleVisible}
-        >
-          <div className="mb-6">
-            <EquationCard label="Linear interpolation resampling" description="From dsp/resampling.py: index positions are computed at pitch_factor spacing, then linearly interpolated.">
-              {'output[n] = signal[⌊n·p⌋]·(1−α) + signal[⌊n·p⌋+1]·α'}
-              <br />
-              {'where α = n·p − ⌊n·p⌋'}
-            </EquationCard>
-          </div>
-
-          <ResamplingSimulation />
-
-          <div className="mt-6">
-            <ImplementationCard
-              file="dsp/resampling.py"
-              fn="naive_resample()"
-              description="n_samples = int(len(signal)/pitch_factor). Indices = arange(n_samples) × pitch_factor. Linear interpolation between floor/ceil. Called by pitch_shift()."
-            />
-          </div>
-        </TheorySection>
-
-        {/* ── 16 WOLA ─────────────────────────────────────────────── */}
-        <TheorySection
-          id="wola"
-          index="16"
-          title="IFFT + Overlap-Add / WOLA"
-          subtitle="Reconstructing a continuous signal from phase-modified STFT frames."
-          whyCard="After phase manipulation, each bin's complex spectrum is converted back to a time-domain frame via IFFT. These frames overlap in time and must be summed with window² normalization (WOLA) to produce a smooth, continuous output without amplitude discontinuities at frame boundaries."
-          onVisible={handleVisible}
-        >
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-6">
-            <EquationCard label="Synthesis frame">
-              {'y_frame[m] = IFFT(|X[m]| · e^(jφ_synth[m]))'}
-            </EquationCard>
-            <EquationCard label="WOLA normalization">
-              {'output[n] = Σₘ (y_frame[m]·w[n]) / Σₘ w²[n]'}
-            </EquationCard>
-          </div>
-
-          <WOLASimulation />
-
-          <div className="mt-6 grid grid-cols-1 sm:grid-cols-2 gap-4">
-            <ImplementationCard
-              file="dsp/stft.py"
-              fn="reconstruct_signal_wola()"
-              description="Accumulates windowed IFFT frames into the output buffer and divides by the summed window² at each position. Clips to original_length."
-            />
-            <ImplementationCard
-              file="dsp/fft_processor.py"
-              fn="compute_ifft()"
-              description="Returns np.real(np.fft.ifft(spectrum)). Taking only the real part discards numerical imaginary residuals from floating-point arithmetic."
-            />
-          </div>
-        </TheorySection>
-
-        {/* ── 17 PHASE LOCKING ────────────────────────────────────── */}
-        <TheorySection
-          id="wola"
-          index="17"
-          title="Phase Locking & Phasiness"
-          subtitle="Reducing phase-vocoder artifacts by preserving spectral coherence."
-          whyCard="The standard phase vocoder processes each bin independently. This breaks the relative phase relationships between harmonically related bins, causing a 'phasey' or smeared quality, especially on transients. Phase locking preserves these relationships by using spectral peak bins as phase anchors."
-          onVisible={handleVisible}
-        >
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-6">
-            <ConceptCard
-              concept="Phasiness"
-              description="An artifact where phase-incoherent spectral components produce a smeared, metallic, or underwater-sounding output. Particularly audible on transients and voiced speech."
-              tags={['Artifact']}
-              variant="highlight"
-            />
-            <ConceptCard
-              concept="Identity Phase Locking"
-              description="Find local spectral magnitude peaks. For every non-peak bin k, set its synthesis phase to: φ_synth[peak] + (φ_orig[k] − φ_orig[peak]). This preserves relative phases around each peak."
-              tags={['Enhancement', 'Implementation']}
-              variant="highlight"
-            />
-          </div>
-
-          <div className="rounded-2xl bg-surface-container-low p-5 mb-4">
-            <p className="text-label-caps text-on-surface-variant mb-3">PHASE LOCKING FORMULA</p>
-            <EquationCard compact>
-              {'φ_locked[k] = φ_synth[peak] + (φ_orig[k] − φ_orig[peak])'}
-            </EquationCard>
-            <p className="text-body-sm text-on-surface-variant mt-3">
-              Peaks found where: mag[k−1] &lt; mag[k] &gt; mag[k+1]. Each non-peak bin is locked to the phase of its nearest amplitude peak.
-            </p>
-          </div>
-
-          <ImplementationCard
-            file="dsp/phase_vocoder.py"
-            fn="time_stretch_with_phase_locking()"
-            description="Peak-based identity phase locking applied every synthesis frame. Enabled by passing phase_locking=True to pitch_shift(). Used by PitchShiftEffect when configured."
+        {/* ═══════════ MODULE 01 ═══════════ */}
+        <div id="module-foundations" className="scroll-mt-24 space-y-12">
+          <ModuleHeader
+            id="mh-foundations"
+            number="Module 01"
+            title="Signals & Sampling Foundations"
+            description="Continuous sound waves, discrete sampling representations, the Nyquist limit, and LTI principles — told as narrative, with motion where the idea needs it."
           />
-        </TheorySection>
 
-        {/* ── 18 LTI & CONVOLUTION ────────────────────────────────── */}
-        <TheorySection
-          id="lti-convolution"
-          index="18"
-          title="LTI Systems, Convolution & Effects"
-          subtitle="How linear time-invariant systems describe the project's effects pipeline."
-          whyCard="Reverb, echo, and filtering are LTI operations implemented via convolution. The phase vocoder is NOT LTI — it involves time-varying phase manipulation. Understanding the distinction is important: convolution describes the effects chain, not the core pitch-shifting algorithm."
-          onVisible={handleVisible}
-        >
-          <div className="mb-6">
-            <EquationCard label="Discrete convolution" description="LTI system output. h[n] is the impulse response encoding the system's behavior (room acoustics for reverb, delay + decay for echo).">
-              {'y[n] = Σₖ x[k] · h[n−k]  =  x[n] * h[n]'}
-            </EquationCard>
-          </div>
+          {/* 01.1 */}
+          <TheorySection
+            id="sub-foundations"
+            index="1.1"
+            title="From air to arrays"
+            subtitle="Sound is continuous. Computers keep only measurements of it."
+            initiallyVisible={true}
+            onVisible={() => handleSectionVisible('sub-foundations')}
+          >
+            <FoundationsPart />
+          </TheorySection>
 
-          <ConvolutionSimulation />
+          {/* 01.2 */}
+          <TheorySection
+            id="sampling"
+            index="1.2"
+            title="How often is often enough?"
+            subtitle="Two points per cycle — and what happens when you cheat."
+            onVisible={() => handleSectionVisible('sub-foundations')}
+          >
+            <SamplingPart />
+          </TheorySection>
 
-          <div className="mt-6 rounded-2xl bg-error/5 border border-error/20 p-4 flex gap-3">
-            <span className="material-symbols-outlined text-error flex-shrink-0 mt-0.5" style={{ fontSize: 18 }}>
-              info
-            </span>
-            <p className="text-body-sm text-on-surface">
-              <strong>Important distinction:</strong> Reverb and Echo in <Eq>dsp/effects.py</Eq> use <Eq>scipy.signal.convolve</Eq> — a true LTI convolution. The phase vocoder (<Eq>time_stretch</Eq>, <Eq>pitch_shift</Eq>) is <strong>not</strong> an LTI system because its behaviour depends on the instantaneous phase of each frame, making it time-varying.
-            </p>
-          </div>
+          <ModuleClose label="Module 01" />
+        </div>
 
-          <div className="mt-4 grid grid-cols-1 sm:grid-cols-2 gap-4">
-            <ImplementationCard
-              file="dsp/effects.py"
-              fn="ReverbEffect.process()"
-              description="Generates a decaying random impulse response and convolves it with the input via scipy.signal.convolve."
+        {/* ═══════════ MODULE 02 ═══════════ */}
+        <div id="module-spectral" className="scroll-mt-24 space-y-12 pt-8">
+          <ModuleHeader
+            id="mh-spectral"
+            number="Module 02"
+            title="Fourier & Spectral Domain Analysis"
+            description="Leave the time axis. DFT and FFT, magnitude versus phase, and what a window does to leakage — each idea in prose, each mechanism in motion."
+          />
+
+          {/* 02.1 DFT & FFT */}
+          <TheorySection
+            id="dft-fft"
+            index="2.1"
+            title="Discrete Fourier Transform & FFT"
+            subtitle="Turning a finite frame of samples into orthogonal complex sinusoidal bins."
+            whyCard="The phase vocoder lives in the frequency domain. FFT evaluates the DFT in O(N log N) instead of O(N²) — the difference between real time and a coffee break."
+            onVisible={() => handleSectionVisible('dft-fft')}
+          >
+            <Prose>
+              <p>
+                Take one windowed frame <LatexInline math="x[n]" />, n = 0…N−1, and ask:
+                how much of each pure sinusoid sits inside it? The discrete Fourier
+                transform answers with one complex number per frequency bin:
+              </p>
+              <DisplayMath math="X[k] = \sum_{n=0}^{N-1} x[n] \cdot e^{-j \frac{2\pi k n}{N}}, \quad k = 0, \dots, N-1" />
+              <p>
+                Bin <LatexInline math="k" /> sits at frequency{' '}
+                <LatexInline math="f_k = k \cdot F_s / N" />. Its magnitude is how loud
+                that tone is in the frame; its angle is where the cycle was when we
+                looked. The FFT is not a different transform — it is the same sum
+                factored so butterfly stages share work.
+              </p>
+            </Prose>
+
+            <FourierSimulation />
+            <DFTvsFFTSimulation />
+
+            <Footnote
+              file="dsp/fft_processor.py"
+              fn="compute_fft"
+              note="numpy.fft.fft(frame) — ~22.5k ops at N=2048 vs 4.19M for the naive double loop"
             />
-            <ImplementationCard
-              file="dsp/effects.py"
-              fn="EchoEffect.process()"
-              description="Adds a delayed, attenuated copy: out[d:] += signal[:-d] × decay. Equivalent to convolution with a two-tap impulse response."
+          </TheorySection>
+
+          {/* 02.2 Magnitude & Phase */}
+          <TheorySection
+            id="magnitude-phase"
+            index="2.2"
+            title="Polar Decomposition: Magnitude & Phase"
+            subtitle="Energy on one hand, temporal alignment on the other."
+            whyCard="Magnitude says which frequencies exist in a frame. Phase says when they line up. The vocoder keeps magnitude and rewrites only phase — that is the whole trick."
+            onVisible={() => handleSectionVisible('dft-fft')}
+          >
+            <Prose>
+              <p>
+                Every complex bin splits cleanly into a length and an angle — Euler’s
+                polar form:
+              </p>
+              <DisplayMath math="X[k] = |X[k]| \cdot e^{j \phi[k]}" />
+              <p>
+                For real-valued audio the spectrum mirrors itself: magnitudes are even,
+                phases odd. Modify one half and the other follows, so we only ever
+                reason about bins 0…N/2.
+              </p>
+              <DisplayMath math="X[N - k] = X^*[k] \implies |X[N-k]| = |X[k]|, \; \phi[N-k] = -\phi[k]" />
+            </Prose>
+
+            <MagnitudePhaseSimulation />
+
+            <Prose>
+              <Footnote
+                file="dsp/fft_processor.py"
+                fn="magnitude_spectrum"
+                note="np.abs(spectrum) — the energy profile of the frame"
+              />
+              <Footnote
+                file="dsp/fft_processor.py"
+                fn="phase_spectrum"
+                note="np.angle(spectrum) — angles wrapped to (−π, π]"
+              />
+            </Prose>
+          </TheorySection>
+
+          {/* 02.3 Windowing */}
+          <TheorySection
+            id="windowing"
+            index="2.3"
+            title="Windowing & Spectral Leakage"
+            subtitle="Taper the frame edges, or the cut itself becomes music."
+            whyCard="A hard truncation is a rectangular window: sinc sidelobes at −13 dB smear every harmonic. Tapering to zero at both ends confines the energy where it belongs."
+            onVisible={() => handleSectionVisible('dft-fft')}
+          >
+            <Prose>
+              <p>
+                The FFT assumes the frame repeats forever. If the ends do not meet, that
+                discontinuity radiates energy across the whole spectrum — leakage. A
+                window multiplies the frame by a smooth envelope that vanishes at the
+                boundaries. Our default is Hann:
+              </p>
+              <DisplayMath math="w[n] = 0.5 \left(1 - \cos\left(\frac{2\pi n}{N-1}\right)\right)" />
+              <p>
+                The windowed frame is just an elementwise product — cheap in time,
+                a convolution (smearing) in frequency. That trade is the price of a
+                quiet floor:
+              </p>
+              <DisplayMath math="x_w[n] = x[n] \cdot w[n]" />
+            </Prose>
+
+            <WindowingSimulation />
+
+            <Footnote
+              file="dsp/windowing.py"
+              fn="get_window"
+              note="Hann, Hamming, Blackman, or rectangular — length N"
             />
-          </div>
-        </TheorySection>
+          </TheorySection>
 
-        {/* ── INTERACTIVE ROADMAP ─────────────────────────────────── */}
-        <TheorySection
-          id="pipeline"
-          index="19"
-          title="Interactive DSP Pipeline Roadmap"
-          subtitle="Click any node to explore its mathematics, equations, and source implementation."
-          onVisible={handleVisible}
-        >
-          <TheoryRoadmap onJumpToSection={handleNavigate} />
-        </TheorySection>
+          <ModuleClose label="Module 02" />
+        </div>
 
-        {/* ── COMPLETE PIPELINE VISUALIZATION ─────────────────────── */}
-        <TheorySection
-          id="pipeline"
-          index="20"
-          title="From Mathematics to Your Voice"
-          subtitle="The complete phase vocoder pipeline — every step animated and annotated."
-          onVisible={handleVisible}
-        >
-          <PipelineVisualization />
-        </TheorySection>
+        {/* ═══════════ MODULE 03 ═══════════ */}
+        <div id="module-vocoder" className="scroll-mt-24 space-y-12 pt-8">
+          <ModuleHeader
+            id="mh-vocoder"
+            number="Module 03"
+            title="Phase Vocoder Engine & Transformation"
+            description="STFT framing, phase unwrapping, instantaneous frequency, time-stretch, pitch-shift, and WOLA resynthesis — the machine this project is built around."
+          />
 
-        {/* ── CONCEPT MAP ─────────────────────────────────────────── */}
-        <TheorySection
-          id="concept-map"
-          index="21"
-          title="Concept Relationship Map"
-          subtitle="How every DSP concept in this project connects to the others."
-          onVisible={handleVisible}
-        >
-          <ConceptMap />
-        </TheorySection>
+          {/* 03.1 STFT */}
+          <TheorySection
+            id="stft"
+            index="3.1"
+            title="Short-Time Fourier Transform (STFT)"
+            subtitle="A slide of window across the signal — time and frequency, together."
+            whyCard="Music and speech never sit still. STFT chops audio into overlapping frames stepped by the analysis hop Ha, so each FFT sees a local snapshot."
+            onVisible={() => handleSectionVisible('stft')}
+          >
+            <Prose>
+              <p>
+                One FFT says nothing about <em>when</em>. The STFT slides a window of
+                length N along the signal, hop by hop, and transforms each visit:
+              </p>
+              <DisplayMath math="\text{STFT}\{x\}[m, k] = \sum_{n=0}^{N-1} x[n + m H_a] \cdot w[n] \cdot e^{-j \frac{2\pi k n}{N}}" />
+              <p>
+                Frame index m advances by <LatexInline math="H_a" />. Our defaults:
+                N = 2048, Ha = 512 — 75% overlap, enough redundancy that no sample is
+                lost under a taper.
+              </p>
+            </Prose>
 
-        {/* ── CONCEPT → IMPLEMENTATION MAPPING ───────────────────── */}
-        <TheorySection
-          id="concept-map"
-          index="22"
-          title="Project Concept → Implementation Mapping"
-          subtitle="Every major concept mapped to its verified source file and function."
-          whyCard="This table is the definitive reference: each concept you've studied above corresponds to a real function in the project's backend. Click any row to see the formula, purpose, and exact source location."
-          onVisible={handleVisible}
-        >
-          <ConceptMappingTable />
-        </TheorySection>
+            <STFTSimulation />
 
-        {/* ── VIVA / QUESTIONNAIRE ────────────────────────────────── */}
-        <TheorySection
-          id="viva"
-          index="23"
-          title='Can You Explain the DSP?'
-          subtitle="80+ viva-style questions covering every concept in this project. Test your understanding from fundamentals to project defense."
-          onVisible={handleVisible}
-        >
-          <Questionnaire />
-        </TheorySection>
+            <Prose>
+              <Footnote
+                file="dsp/stft.py"
+                fn="create_frames"
+                note="stride-trick view of shape (n_frames, n_fft)"
+              />
+              <Footnote
+                file="dsp/stft.py"
+                fn="compute_stft"
+                note="window + FFT per frame → complex matrix, magnitude, phase"
+              />
+            </Prose>
+          </TheorySection>
 
-        {/* ── FINAL SUMMARY ───────────────────────────────────────── */}
-        <FinalSummary />
+          {/* 03.2 Phase & instantaneous frequency */}
+          <TheorySection
+            id="phase-vocoder"
+            index="3.2"
+            title="Phase Difference & Instantaneous Frequency"
+            subtitle="Why you cannot recycle phase when the hop changes."
+            whyCard="When Hs ≠ Ha the old phases no longer describe the new time positions. True instantaneous frequency tells each bin how far to advance next."
+            onVisible={() => handleSectionVisible('phase-vocoder')}
+          >
+            <Prose>
+              <p>
+                A sinusoid locked to bin k would advance by a known angle each analysis
+                hop — the nominal rate:
+              </p>
+              <DisplayMath math="\Omega_k = \frac{2\pi k}{N} \cdot H_a" />
+              <p>
+                Real energy rarely sits dead-centre in a bin, so the measured step
+                overshoots or lags. Wrap that residual into (−π, π]:
+              </p>
+              <DisplayMath math="\Delta\Phi_k = \text{wrap}\Big(\phi_m[k] - \phi_{m-1}[k] - \Omega_k\Big)" />
+              <p>
+                and correct the bin centre into the true tone frequency:
+              </p>
+              <DisplayMath math="\omega_{\text{inst}}[k] = \frac{2\pi k}{N} + \frac{\Delta\Phi_k}{H_a}" />
+              <p>
+                Synthesis then walks phase forward with the <em>synthesis</em> hop —
+                this is what keeps overlap-add coherent when frames are spaced
+                differently than they were analysis:
+              </p>
+              <DisplayMath math="\phi_{\text{synth}}[m, k] = \phi_{\text{synth}}[m-1, k] + \omega_{\text{inst}}[k] \cdot H_s" />
+            </Prose>
+
+            <PhaseWheelSimulation />
+            <PhaseVocoderSimulation />
+
+            <Prose>
+              <Footnote
+                file="dsp/fft_processor.py"
+                fn="wrap_phase"
+                note="(φ + π) mod 2π − π — keeps residuals in the principal branch"
+              />
+              <Footnote
+                file="dsp/phase_vocoder.py"
+                fn="estimate_instantaneous_frequency"
+                note="true bin frequency from consecutive frame phase advances"
+              />
+            </Prose>
+          </TheorySection>
+
+          {/* 03.3 Time & pitch */}
+          <TheorySection
+            id="time-stretching"
+            index="3.3"
+            title="Time-Stretching & Independent Pitch Shifting"
+            subtitle="Two levers that usually move together — pulled apart."
+            whyCard="Naive resampling ties pitch to duration. Stretch first (pitch preserved), then resample back to original length — the duration change cancels, only pitch remains."
+            onVisible={() => handleSectionVisible('time-stretching')}
+          >
+            <Prose>
+              <p>
+                Musical intervals map to frequency ratios on the equal-tempered ladder —
+                twelve semitones to an octave, an octave a doubling:
+              </p>
+              <DisplayMath math="p = 2^{\frac{\Delta \text{semitones}}{12}}" />
+              <p>
+                Pitch shifting is stretch-then-resample: synthesis hop scales so the
+                signal is first laid out at duration 1/p, then naively resampled by p —
+                duration restored, pitch left at p·f₀:
+              </p>
+              <DisplayMath math="H_s = \text{round}(H_a \cdot \alpha) = \text{round}\left(\frac{H_a}{p}\right)" />
+            </Prose>
+
+            <TimeStretchSimulation />
+            <PitchShiftSimulation />
+            <ResamplingSimulation />
+
+            <Prose>
+              <Footnote
+                file="dsp/phase_vocoder.py"
+                fn="pitch_shift"
+                note="time_stretch(signal, 1/p) → naive_resample(stretched, p)"
+              />
+              <Footnote
+                file="dsp/resampling.py"
+                fn="naive_resample"
+                note="linear-interp playback-rate change — moves pitch and duration together"
+              />
+            </Prose>
+          </TheorySection>
+
+          {/* 03.4 WOLA & locking */}
+          <TheorySection
+            id="wola"
+            index="3.4"
+            title="WOLA Resynthesis & Phase Locking"
+            subtitle="No clicks at the seams, no watery ghost between bins."
+            whyCard="Plain overlap-add ripples in amplitude. Unlocked phases drift into a hollow phasiness. Weighted overlap-add plus identity phase locking is the fix."
+            onVisible={() => handleSectionVisible('wola')}
+          >
+            <Prose>
+              <p>
+                After IFFT, each synthesis frame is tapered again and summed. Divide by
+                the running sum of squared windows and reconstruction is unity-gain
+                wherever the overlap is sufficient:
+              </p>
+              <DisplayMath math="y[n] = \frac{\sum_m y_m[n - m H_s] \cdot w[n - m H_s]}{\sum_m w^2[n - m H_s]}" />
+              <p>
+                Phase locking goes further: once a spectral peak’s phase is
+                accumulated, neighbours that only carry its leakage keep their original
+                phase <em>offset relative to that peak</em> — transients stay crisp:
+              </p>
+              <DisplayMath math="\phi_{\text{synth}}[k] = \phi_{\text{synth}}[\text{peak}] + \Big(\phi_{\text{orig}}[k] - \phi_{\text{orig}}[\text{peak}]\Big)" />
+            </Prose>
+
+            <WOLASimulation />
+
+            <Prose>
+              <Footnote
+                file="dsp/stft.py"
+                fn="reconstruct_signal_wola"
+                note="overlap windowed IFFT frames ÷ Σ w²"
+              />
+              <Footnote
+                file="dsp/phase_vocoder.py"
+                fn="time_stretch_with_phase_locking"
+                note="peak-pick, lock neighbouring bins to the peak’s phase walk"
+              />
+            </Prose>
+          </TheorySection>
+
+          {/* 03.5 LTI contrast */}
+          <TheorySection
+            id="sub-lti"
+            index="3.5"
+            title="LTI Effects & Convolution"
+            subtitle="What the vocoder is not — and why that matters."
+            whyCard="Reverb, echo, and EQ are textbook LTI: one impulse response, convolution, done. The vocoder cannot be written that way — that is the point of Module 03."
+            onVisible={() => handleSectionVisible('wola')}
+          >
+            <Prose>
+              <p>
+                An LTI system is fully described by its response to a single impulse{' '}
+                <LatexInline math="h[n]" />. Any input is just scaled, shifted copies
+                of that impulse sliding past each other:
+              </p>
+              <DisplayMath math="y[n] = x[n] * h[n] = \sum_{k=-\infty}^{\infty} x[k] \cdot h[n - k]" />
+            </Prose>
+
+            <ConvolutionSimulation />
+
+            <Footnote
+              file="dsp/effects.py"
+              fn="ReverbEffect.process"
+              note="synthesizes a decaying impulse response, convolves via scipy.signal"
+            />
+          </TheorySection>
+
+          <ModuleClose label="Module 03" />
+        </div>
+
+        {/* ═══════════ MODULE 04 ═══════════ */}
+        <div id="module-defense" className="scroll-mt-24 space-y-12 pt-8">
+          <ModuleHeader
+            id="mh-defense"
+            number="Module 04"
+            title="End-to-End Pipeline"
+            description="One linear path from raw samples to reconstructed output."
+          />
+
+          {/* 04.1 Pipeline */}
+          <TheorySection
+            id="pipeline"
+            index="4.1"
+            title="End-to-End Pipeline"
+            subtitle="Input samples to reconstructed output, one stage at a time."
+            onVisible={() => handleSectionVisible('pipeline')}
+          >
+            <PipelineVisualization />
+          </TheorySection>
+
+          <FinalSummary />
+          <ModuleClose label="Theory" />
+        </div>
 
       </div>
     </div>
   );
+}
+
+function LatexInline({ math }: { math: string }) {
+  return <Latex math={math} />;
 }

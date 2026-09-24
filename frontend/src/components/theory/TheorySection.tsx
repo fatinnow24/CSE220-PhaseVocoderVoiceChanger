@@ -2,19 +2,18 @@ import { ReactNode, useRef, useEffect, useState } from 'react';
 
 interface TheorySectionProps {
   id: string;
-  index?: string; // e.g. "01"
+  index?: string;
   title: string;
   subtitle?: string;
-  whyCard?: string; // "Why is this here?" explanation
+  whyCard?: string;
   children: ReactNode;
   onVisible?: (id: string) => void;
   initiallyVisible?: boolean;
 }
 
 /**
- * TheorySection — section wrapper for the Theory page.
- * Handles IntersectionObserver reporting (for sticky nav highlight)
- * and renders the standard section header + "Why is this here?" card.
+ * TheorySection — section wrapper for the Theory page with calm checklist design
+ * and reliable scroll spy observation.
  */
 export default function TheorySection({
   id,
@@ -38,7 +37,7 @@ export default function TheorySection({
           onVisible?.(id);
         }
       },
-      { rootMargin: '-5% 0px -15% 0px', threshold: 0 }
+      { rootMargin: '-10% 0px -40% 0px', threshold: 0 }
     );
     obs.observe(ref.current);
     return () => obs.disconnect();
@@ -48,35 +47,38 @@ export default function TheorySection({
     <section
       id={id}
       ref={ref}
-      className={`scroll-mt-20 transition-all duration-700 ${visible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4'}`}
+      className={`scroll-mt-20 pt-6 transition-all duration-500 ${
+        visible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-2'
+      }`}
     >
       {/* Section header */}
-      <div className="mb-6">
-        {index && (
-          <span className="text-label-caps text-primary font-bold mb-1 block">
-            SECTION {index}
-          </span>
-        )}
-        <h2 className="text-headline-lg font-bold text-on-surface leading-tight">{title}</h2>
+      <div className="mb-5">
+        <div className="flex items-center gap-2 mb-1.5">
+          {index && (
+            <span className="text-[11px] font-semibold tracking-wider text-ink-tertiary uppercase">
+              Part {index}
+            </span>
+          )}
+        </div>
+        <h2 className="text-[22px] md:text-[24px] font-semibold text-ink-primary tracking-tight leading-tight">
+          {title}
+        </h2>
         {subtitle && (
-          <p className="text-body-lg text-on-surface-variant mt-1">{subtitle}</p>
+          <p className="text-[13.5px] text-ink-secondary mt-1 leading-relaxed w-full">
+            {subtitle}
+          </p>
         )}
       </div>
 
-      {/* "Why is this here?" card */}
+      {/* "Why is this here?" — plain italic line, not a card */}
       {whyCard && (
-        <div className="mb-6 rounded-2xl bg-primary-container/30 border border-primary/20 p-4 flex gap-3">
-          <span className="material-symbols-outlined text-primary flex-shrink-0 mt-0.5" style={{ fontSize: 18 }}>
-            help_outline
-          </span>
-          <div>
-            <p className="text-label-caps text-primary mb-1">WHY IS THIS HERE?</p>
-            <p className="text-body-sm text-on-surface leading-relaxed">{whyCard}</p>
-          </div>
-        </div>
+        <p className="w-full mb-5 text-[14px] italic leading-relaxed text-ink-secondary">
+          {whyCard}
+        </p>
       )}
 
-      {children}
+      {/* Content */}
+      <div className="space-y-4 w-full">{children}</div>
     </section>
   );
 }

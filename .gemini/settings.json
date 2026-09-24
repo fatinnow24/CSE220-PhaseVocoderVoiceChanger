@@ -1,0 +1,67 @@
+{
+  "hooks": {
+    "BeforeModel": [
+      {
+        "matcher": "*",
+        "hooks": [
+          {
+            "name": "enforce-direct-file-tools",
+            "type": "command",
+            "command": "$GEMINI_PROJECT_DIR/.gemini/hooks/read-limiter.sh before_model",
+            "description": "Inject directive instructing agy to use direct read and write file tools instead of bash scripts"
+          }
+        ]
+      }
+    ],
+    "BeforeAgent": [
+      {
+        "matcher": "*",
+        "hooks": [
+          {
+            "name": "read-limiter-reset-turn",
+            "type": "command",
+            "command": "$GEMINI_PROJECT_DIR/.gemini/hooks/read-limiter.sh reset_all",
+            "description": "Reset per-file read counters at the start of each new prompt"
+          }
+        ]
+      }
+    ],
+    "BeforeTool": [
+      {
+        "matcher": "read_file|view_file",
+        "hooks": [
+          {
+            "name": "read-limiter-check",
+            "type": "command",
+            "command": "$GEMINI_PROJECT_DIR/.gemini/hooks/read-limiter.sh check_read",
+            "description": "Deny reading the same file more than 3 times per prompt"
+          }
+        ]
+      },
+      {
+        "matcher": "run_command",
+        "hooks": [
+          {
+            "name": "warn-bash-usage",
+            "type": "command",
+            "command": "$GEMINI_PROJECT_DIR/.gemini/hooks/read-limiter.sh check_bash",
+            "description": "Warn or restrict running bash scripts when direct file tools should be used"
+          }
+        ]
+      }
+    ],
+    "AfterTool": [
+      {
+        "matcher": "write_file|replace|replace_file_content|write_to_file",
+        "hooks": [
+          {
+            "name": "read-limiter-reset-on-edit",
+            "type": "command",
+            "command": "$GEMINI_PROJECT_DIR/.gemini/hooks/read-limiter.sh reset_file",
+            "description": "Reset a file's read counter after it is successfully edited"
+          }
+        ]
+      }
+    ]
+  }
+}

@@ -1,20 +1,9 @@
 import { useEffect, useRef, useCallback } from 'react';
 
-interface TheoryHeroProps {
-  onExplore: () => void;
-}
-
-const CONCEPT_CHIPS = [
-  'Sampling', 'DFT / FFT', 'STFT', 'Magnitude', 'Phase',
-  'Windowing', 'Phase Vocoder', 'Time Stretching', 'Pitch Shifting',
-  'Resampling', 'WOLA', 'Phase Locking',
-];
-
 /**
- * TheoryHero — hero section for the Theory page.
- * Features a continuously animated SVG sine wave and concept chips.
+ * TheoryHero — hero section for the Theory page with animated scope wave.
  */
-export default function TheoryHero({ onExplore }: TheoryHeroProps) {
+export default function TheoryHero() {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const animRef = useRef<number>(0);
   const phaseRef = useRef(0);
@@ -100,34 +89,13 @@ export default function TheoryHero({ onExplore }: TheoryHeroProps) {
         <div className="mb-1">
           <span className="text-label-caps text-primary font-bold">THEORY LABORATORY</span>
         </div>
-        <h1 className="text-display font-bold text-on-surface mb-3 leading-tight">
+        <h1 className="text-display font-bold text-on-surface mb-2 leading-tight">
           Signals &amp; Systems<br className="hidden sm:block" /> Behind the Voice Changer
         </h1>
-        <p className="text-body-lg text-on-surface-variant max-w-2xl mb-6 leading-relaxed">
+        <p className="text-body-lg text-on-surface-variant max-w-2xl leading-relaxed">
           Explore the mathematics, signal transformations, Fourier analysis, phase processing,
           resampling, and reconstruction techniques that power the Phase Vocoder Voice Changer.
         </p>
-
-        {/* Concept chips */}
-        <div className="flex flex-wrap gap-2 mb-6">
-          {CONCEPT_CHIPS.map((chip) => (
-            <span
-              key={chip}
-              className="text-label-caps bg-surface-container text-on-surface-variant px-3 py-1.5 rounded-full border border-outline-variant/30 hover:bg-primary-container hover:text-on-primary-container hover:border-primary/30 transition-colors cursor-default"
-            >
-              {chip}
-            </span>
-          ))}
-        </div>
-
-        {/* CTA */}
-        <button
-          onClick={onExplore}
-          className="inline-flex items-center gap-2 text-body-lg font-medium text-primary hover:text-on-primary hover:bg-primary px-5 py-2.5 rounded-full transition-all duration-200 border border-primary/30 hover:border-transparent hover:shadow-active"
-        >
-          Explore the Pipeline
-          <span className="material-symbols-outlined" style={{ fontSize: 18 }}>arrow_downward</span>
-        </button>
       </div>
     </div>
   );

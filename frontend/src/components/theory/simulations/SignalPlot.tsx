@@ -113,9 +113,13 @@ export default function SignalPlot({
   }, [data, height, color, animated, isVisible, phase]);
 
   return (
-    <div ref={containerRef} className="relative w-full" style={{ height }}>
-      {label && <div className="absolute top-2 left-2 text-label-caps text-on-surface-variant z-10">{label}</div>}
-      <canvas ref={canvasRef} className="w-full h-full block bg-transparent" />
+    <div ref={containerRef} className="w-full">
+      {label && (
+        <div className="mb-1.5 text-label-caps text-on-surface-variant">{label}</div>
+      )}
+      <div className="relative w-full" style={{ height }}>
+        <canvas ref={canvasRef} className="w-full h-full block bg-transparent" />
+      </div>
     </div>
   );
 }

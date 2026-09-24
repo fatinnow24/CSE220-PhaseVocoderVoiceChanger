@@ -5,9 +5,9 @@ import Button from '../../ui/Button';
 export default function TimeStretchSimulation() {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const [stretchFactor, setStretchFactor] = useState(1.0);
-  
+
   const factors = [0.5, 0.75, 1.0, 1.25, 1.5, 2.0];
-  
+
   const isReducedMotion = useMemo(() => {
     if (typeof window !== 'undefined') return window.matchMedia('(prefers-reduced-motion: reduce)').matches;
     return false;
@@ -37,18 +37,18 @@ export default function TimeStretchSimulation() {
         }
 
         ctx.clearRect(0, 0, rect.width, rect.height);
-        
+
         const w = rect.width / 2;
         const h = rect.height;
-        
+
         const drawWave = (xOffset: number, factor: number) => {
           ctx.beginPath();
           ctx.strokeStyle = '#49645d';
           ctx.lineWidth = 2;
-          
+
           const maxSamples = 200;
           const displaySamples = maxSamples * factor;
-          
+
           for(let i=0; i<displaySamples; i++) {
             // Constant frequency, just different duration
             const y = h/2 - Math.sin(i * 0.1) * (h/4);
@@ -94,11 +94,12 @@ export default function TimeStretchSimulation() {
   return (
     <Card className="p-6">
       <h3 className="text-title-md mb-4">Time Stretching</h3>
-      
+
       <div className="flex gap-2 mb-4 flex-wrap">
         {factors.map(f => (
-          <Button 
-            key={f} 
+          <Button
+            key={f}
+            size="sm"
             variant={stretchFactor === f ? 'primary' : 'secondary'}
             onClick={() => setStretchFactor(f)}
           >
@@ -116,9 +117,9 @@ export default function TimeStretchSimulation() {
           <p className="text-xs text-on-surface-variant">Pitch: unchanged (phase vocoder preserves pitch)</p>
         </div>
       </div>
-      
+
       <canvas ref={canvasRef} className="w-full h-48 bg-surface-container-lowest rounded-xl shadow-inner mb-4" />
-      
+
       <div className="bg-primary-container p-4 rounded-xl text-on-primary-container text-body-sm font-mono mb-4">
         <p>Hs = Ha × stretch_factor</p>
         <p>(default Ha = 512)</p>

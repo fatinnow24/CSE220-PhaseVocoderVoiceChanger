@@ -9,17 +9,39 @@ def read_audio_file(file_path: str) -> tuple[np.ndarray, int]:
         if len(data.shape) > 1:
             data = np.mean(data, axis=1) # convert to mono
         return data.astype(np.float64), samplerate
-    except Exception as e:
-        audio = pydub.AudioSegment.from_file(file_path)
-        audio = audio.set_channels(1)
-        samples = np.array(audio.get_array_of_samples())
-        if audio.sample_width == 2:
-            samples = samples.astype(np.float64) / 32768.0
-        elif audio.sample_width == 4:
-            samples = samples.astype(np.float64) / 2147483648.0
-        else:
-            samples = samples.astype(np.float64)
-        return samples, audio.frame_rate
+    except Exception:
+        # Fallback 1: pydub (backed by audioop-lts and ffmpeg)
+        try:
+            audio = pydub.AudioSegment.from_file(file_path)
+            audio = audio.set_channels(1)
+            samples = np.array(audio.get_array_of_samples())
+            if audio.sample_width == 2:
+                samples = samples.astype(np.float64) / 32768.0
+            elif audio.sample_width == 4:
+                samples = samples.astype(np.float64) / 2147483648.0
+            else:
+                samples = samples.astype(np.float64)
+            return samples, audio.frame_rate
+        except Exception:
+            # Fallback 2: direct ffmpeg subprocess transcode to temporary wav
+            import subprocess
+            import tempfile
+            with tempfile.NamedTemporaryFile(suffix='.wav', delete=False) as tmp_out:
+                tmp_out_path = tmp_out.name
+            try:
+                cmd = [
+                    'ffmpeg', '-y', '-i', file_path,
+                    '-vn', '-acodec', 'pcm_s16le', '-ar', '44100', '-ac', '1',
+                    tmp_out_path
+                ]
+                subprocess.run(cmd, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL, check=True)
+                data, samplerate = sf.read(tmp_out_path)
+                if len(data.shape) > 1:
+                    data = np.mean(data, axis=1)
+                return data.astype(np.float64), samplerate
+            finally:
+                if os.path.exists(tmp_out_path):
+                    os.remove(tmp_out_path)
 
 def write_wav(signal: np.ndarray, sample_rate: int, path: str) -> None:
     # Normalize to a consistent RMS level (−9 dBFS ≈ 0.35 RMS).

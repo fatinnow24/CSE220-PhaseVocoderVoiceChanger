@@ -4,21 +4,13 @@ interface TheoryNavProps {
 }
 
 const NAV_ITEMS = [
-  { id: 'foundations', label: 'Foundations' },
-  { id: 'sampling', label: 'Sampling' },
-  { id: 'fourier', label: 'Fourier' },
-  { id: 'dft-fft', label: 'DFT & FFT' },
-  { id: 'magnitude-phase', label: 'Mag & Phase' },
-  { id: 'windowing', label: 'Windowing' },
+  { id: 'sub-foundations', label: 'Foundations' },
+  { id: 'dft-fft', label: 'Spectral' },
   { id: 'stft', label: 'STFT' },
   { id: 'phase-vocoder', label: 'Phase Vocoder' },
-  { id: 'pitch-shifting', label: 'Pitch Shift' },
-  { id: 'resampling', label: 'Resampling' },
-  { id: 'wola', label: 'WOLA' },
-  { id: 'lti-convolution', label: 'LTI & Convolution' },
+  { id: 'time-stretching', label: 'Time & Pitch' },
+  { id: 'wola', label: 'WOLA & LTI' },
   { id: 'pipeline', label: 'Pipeline' },
-  { id: 'concept-map', label: 'Concept Map' },
-  { id: 'viva', label: 'Viva' },
 ];
 
 /**
@@ -28,8 +20,8 @@ const NAV_ITEMS = [
 export default function TheoryNav({ activeSection, onNavigate }: TheoryNavProps) {
   return (
     <div className="sticky top-0 z-30 bg-surface-container-lowest/90 backdrop-blur-sm border-b border-surface-container-high shadow-card/30">
-      <div className="max-w-7xl mx-auto px-4">
-        <div className="flex items-center gap-1 overflow-x-auto py-2.5 scrollbar-hide">
+      <div className="w-full">
+        <div className="flex items-center justify-center gap-1 overflow-x-auto py-2.5 scrollbar-hide">
           {NAV_ITEMS.map((item) => {
             const isActive = activeSection === item.id;
             return (

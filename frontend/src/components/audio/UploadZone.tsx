@@ -22,63 +22,12 @@ function formatTimestamp(): string {
 }
 
 /**
- * Decode any browser-recorded blob (WebM/Opus, OGG, MP4…) into a standard
- * 16-bit mono WAV using the browser's own AudioContext decoder.
- * This makes the file readable by soundfile on the backend without needing FFmpeg.
+ * Convert recorded WAV blob directly into a File object.
+ * With direct PCM capture, the blob is already a valid 16-bit PCM WAV.
  */
-async function blobToWavFile(blob: Blob, baseFilename: string): Promise<File> {
-  const arrayBuffer = await blob.arrayBuffer();
-  const audioCtx = new AudioContext();
-  let audioBuffer: AudioBuffer;
-  try {
-    audioBuffer = await audioCtx.decodeAudioData(arrayBuffer);
-  } finally {
-    audioCtx.close().catch(() => {});
-  }
-
-  // Mix down to mono by averaging all channels
-  const numChannels = audioBuffer.numberOfChannels;
-  const numSamples = audioBuffer.length;
-  const sampleRate = audioBuffer.sampleRate;
-
-  const monoData = new Float32Array(numSamples);
-  for (let ch = 0; ch < numChannels; ch++) {
-    const channelData = audioBuffer.getChannelData(ch);
-    for (let i = 0; i < numSamples; i++) {
-      monoData[i] += channelData[i] / numChannels;
-    }
-  }
-
-  // Build 16-bit PCM WAV
-  const wavBuffer = new ArrayBuffer(44 + numSamples * 2);
-  const view = new DataView(wavBuffer);
-  const writeStr = (offset: number, str: string) => {
-    for (let i = 0; i < str.length; i++) view.setUint8(offset + i, str.charCodeAt(i));
-  };
-
-  writeStr(0, 'RIFF');
-  view.setUint32(4, 36 + numSamples * 2, true);
-  writeStr(8, 'WAVE');
-  writeStr(12, 'fmt ');
-  view.setUint32(16, 16, true);          // subchunk size
-  view.setUint16(20, 1, true);           // PCM format
-  view.setUint16(22, 1, true);           // mono
-  view.setUint32(24, sampleRate, true);
-  view.setUint32(28, sampleRate * 2, true); // byte rate
-  view.setUint16(32, 2, true);           // block align
-  view.setUint16(34, 16, true);          // bits per sample
-  writeStr(36, 'data');
-  view.setUint32(40, numSamples * 2, true);
-
-  let offset = 44;
-  for (let i = 0; i < numSamples; i++) {
-    const clamped = Math.max(-1, Math.min(1, monoData[i]));
-    view.setInt16(offset, clamped < 0 ? clamped * 0x8000 : clamped * 0x7fff, true);
-    offset += 2;
-  }
-
-  const wavFilename = baseFilename.replace(/\.[^.]+$/, '.wav');
-  return new File([wavBuffer], wavFilename, { type: 'audio/wav' });
+function blobToWavFile(blob: Blob, baseFilename: string): File {
+  const wavFilename = baseFilename.replace(/\.[^.]+$/, '') + '.wav';
+  return new File([blob], wavFilename, { type: 'audio/wav' });
 }
 
 /** Minimal silent bar visualizer driven by AnalyserNode (no speaker output). */
@@ -207,8 +156,7 @@ export default function UploadZone({ onFileSelect, isUploading, uploadProgress }
     setRecorderError(null);
     try {
       const finalName = recordingName.trim() || `recording-${timestampRef.current || formatTimestamp()}`;
-      // Decode the WebM/Opus blob → 16-bit mono WAV in the browser.
-      const wavFile = await blobToWavFile(recordedBlob, `${finalName}.webm`);
+      const wavFile = blobToWavFile(recordedBlob, finalName);
       onFileSelect(wavFile);
       resetRecorder();
     } catch (err) {

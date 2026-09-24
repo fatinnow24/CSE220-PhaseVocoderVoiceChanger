@@ -58,24 +58,63 @@ export default function SpectrumPlot({
 
       if (frequencies.length === 0) return;
 
-      const barWidth = Math.max(1, width / frequencies.length - 1);
-      const maxMag = Math.max(1, ...magnitudes);
+      const padBottom = 18;
+      const plotH = h - padBottom;
+      const slot = width / frequencies.length;
+      const barWidth = Math.max(2, slot - Math.max(1, slot * 0.2));
+      const maxMag = Math.max(1e-9, ...magnitudes);
+
+      // baseline
+      ctx.strokeStyle = 'rgba(31, 35, 40, 0.12)';
+      ctx.lineWidth = 1;
+      ctx.beginPath();
+      ctx.moveTo(0, plotH + 0.5);
+      ctx.lineTo(width, plotH + 0.5);
+      ctx.stroke();
 
       for (let i = 0; i < frequencies.length; i++) {
-        const x = i * (width / frequencies.length);
-        const barHeight = (magnitudes[i] / maxMag) * (h - 20);
-        const y = h - 20 - barHeight;
+        const norm = magnitudes[i] / maxMag;
+        if (norm <= 0.001) continue;
 
-        ctx.fillStyle = i === highlightBin ? '#49645d' : '#a7c4bc';
-        ctx.fillRect(x, y, barWidth, barHeight);
+        const x = i * slot + (slot - barWidth) / 2;
+        const barHeight = Math.max(2, norm * (plotH - 4));
+        const y = plotH - barHeight;
+
+        // energy-scaled fill: pale floor → deep sage at peaks
+        const isHi = i === highlightBin;
+        if (isHi) {
+          ctx.fillStyle = '#49645d';
+        } else if (norm > 0.55) {
+          ctx.fillStyle = '#6f8f87';
+        } else if (norm > 0.2) {
+          ctx.fillStyle = '#a7c4bc';
+        } else {
+          ctx.fillStyle = 'rgba(167, 196, 188, 0.55)';
+        }
+
+        // rounded top
+        const r = Math.min(3, barWidth / 2, barHeight);
+        ctx.beginPath();
+        ctx.moveTo(x, y + r);
+        ctx.arcTo(x, y, x + r, y, r);
+        ctx.lineTo(x + barWidth - r, y);
+        ctx.arcTo(x + barWidth, y, x + barWidth, y + r, r);
+        ctx.lineTo(x + barWidth, plotH);
+        ctx.lineTo(x, plotH);
+        ctx.closePath();
+        ctx.fill();
       }
 
-      ctx.fillStyle = '#111c2d';
-      ctx.font = '10px Manrope, sans-serif';
+      // axis labels — muted ink, app font
+      ctx.fillStyle = '#8c959f';
+      ctx.font = '10px Outfit, sans-serif';
+      ctx.textBaseline = 'top';
+      ctx.textAlign = 'left';
+      ctx.fillText('0', 2, plotH + 5);
       ctx.textAlign = 'center';
-      ctx.fillText('0', 10, h - 5);
-      ctx.fillText('Fs/4', width / 2, h - 5);
-      ctx.fillText('Fs/2', width - 20, h - 5);
+      ctx.fillText('Fs/4', width / 2, plotH + 5);
+      ctx.textAlign = 'right';
+      ctx.fillText('Fs/2', width - 2, plotH + 5);
     };
 
     if (isVisible) draw();
@@ -84,9 +123,13 @@ export default function SpectrumPlot({
   }, [frequencies, magnitudes, height, highlightBin, isVisible]);
 
   return (
-    <div ref={containerRef} className="relative w-full" style={{ height }}>
-      {label && <div className="absolute top-2 left-2 text-label-caps text-on-surface-variant z-10">{label}</div>}
-      <canvas ref={canvasRef} className="w-full h-full block bg-transparent" />
+    <div ref={containerRef} className="w-full">
+      {label && (
+        <div className="mb-1.5 text-label-caps text-on-surface-variant">{label}</div>
+      )}
+      <div className="relative w-full" style={{ height }}>
+        <canvas ref={canvasRef} className="w-full h-full block bg-transparent" />
+      </div>
     </div>
   );
 }
