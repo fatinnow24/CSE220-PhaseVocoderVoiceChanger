@@ -25,10 +25,10 @@ export function StudioAnalysisMetrics() {
   const col2 = metrics.slice(4, 8);
 
   return (
-    <div className="bg-[#f0ead8] rounded-[24px] px-6 pt-6 pb-7 flex flex-col gap-4 select-none shadow-none">
-      <div className="flex items-center justify-between pb-1 border-b border-[rgba(38,33,28,0.08)]">
-        <h3 className="text-[17px] font-semibold text-[#26211c] tracking-tight">Audio Analysis</h3>
-        <span className="text-[12px] font-medium text-[#57534e]">Computed</span>
+    <div className="bg-pastel-cream rounded-[24px] px-6 pt-6 pb-7 flex flex-col gap-4 select-none shadow-none">
+      <div className="flex items-center justify-between pb-1 border-b border-hairline">
+        <h3 className="text-[17px] font-semibold text-ink-primary tracking-tight">Audio Analysis</h3>
+        <span className="text-[12px] font-medium text-ink-secondary">Computed</span>
       </div>
 
       <div className="grid grid-cols-2 gap-x-6 gap-y-1">
@@ -39,8 +39,8 @@ export function StudioAnalysisMetrics() {
               key={idx}
               className="flex justify-between items-center py-2 border-b border-[rgba(38,33,28,0.07)] text-[13px]"
             >
-              <span className="text-[#57534e] font-normal">{m.label}</span>
-              <span className="text-[#26211c] font-medium">{m.value}</span>
+              <span className="text-ink-secondary font-normal">{m.label}</span>
+              <span className="text-ink-primary font-medium">{m.value}</span>
             </div>
           ))}
         </div>
@@ -52,8 +52,8 @@ export function StudioAnalysisMetrics() {
               key={idx}
               className="flex justify-between items-center py-2 border-b border-[rgba(38,33,28,0.07)] text-[13px]"
             >
-              <span className="text-[#57534e] font-normal">{m.label}</span>
-              <span className="text-[#26211c] font-medium">{m.value}</span>
+              <span className="text-ink-secondary font-normal">{m.label}</span>
+              <span className="text-ink-primary font-medium">{m.value}</span>
             </div>
           ))}
         </div>
@@ -122,13 +122,13 @@ export function StudioSpectrogramCard() {
   }, [spectrogramData]);
 
   return (
-    <div className="bg-[#dce6f0] rounded-[24px] p-6 flex flex-col gap-4 select-none shadow-none">
+    <div className="bg-pastel-blue rounded-[24px] p-6 flex flex-col gap-4 select-none shadow-none">
       <div className="flex items-center justify-between">
         <div>
-          <h3 className="text-[18px] font-semibold text-[#26211c] tracking-tight">Spectrogram Matrix</h3>
-          <p className="text-[12px] text-[#57534e]">STFT 2D time-frequency heat distribution</p>
+          <h3 className="text-[18px] font-semibold text-ink-primary tracking-tight">Spectrogram Matrix</h3>
+          <p className="text-[12px] text-ink-secondary">STFT 2D time-frequency heat distribution</p>
         </div>
-        <span className="text-[12px] font-medium text-[#57534e]">
+        <span className="text-[12px] font-medium text-ink-secondary">
           2D STFT
         </span>
       </div>
@@ -136,7 +136,7 @@ export function StudioSpectrogramCard() {
       <div className="h-[200px] w-full relative flex items-center justify-center">
         <canvas ref={canvasRef} className="w-full h-full rounded-[14px]" />
         {!spectrogramData && (
-          <div className="absolute inset-0 flex items-center justify-center text-[12px] text-[#57534e]">
+          <div className="absolute inset-0 flex items-center justify-center text-[12px] text-ink-secondary">
             No spectrogram generated
           </div>
         )}

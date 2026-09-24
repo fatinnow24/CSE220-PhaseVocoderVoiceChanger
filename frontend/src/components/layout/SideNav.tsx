@@ -56,8 +56,8 @@ export default function SideNav() {
             className={({ isActive }) =>
               `flex items-center gap-3 px-3.5 py-2 rounded-ios-lg transition-all text-[13px] font-medium ${
                 isActive
-                  ? 'bg-[#e5e3e8] text-ink-primary font-semibold'
-                  : 'text-ink-secondary hover:text-ink-primary hover:bg-[#e5e3e8]/50'
+                  ? 'bg-pastel-lavender text-ink-primary font-semibold'
+                  : 'text-ink-secondary hover:text-ink-primary hover:bg-pastel-lavender/50'
               }`
             }
           >

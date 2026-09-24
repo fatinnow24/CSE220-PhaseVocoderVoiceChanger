@@ -9,7 +9,7 @@ interface ComparisonSignalGraphsProps {
   naiveProgressPct: number;
 }
 
-function WaveformCanvas({ data, color, progressPct }: { data: WaveformData | null, color: string, progressPct: number }) {
+function WaveformCanvas({ data, color, progressPct, duration = 0 }: { data: WaveformData | null, color: string, progressPct: number, duration?: number }) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
 
   useEffect(() => {
@@ -55,8 +55,46 @@ function WaveformCanvas({ data, color, progressPct }: { data: WaveformData | nul
     }
   }, [data, color]);
 
+  const [hover, setHover] = useState({ visible: false, x: 0, y: 0, label: '' });
+  const containerRef = useRef<HTMLDivElement>(null);
+
+  const handleMouseMove = (e: React.MouseEvent<HTMLDivElement>) => {
+    const container = containerRef.current;
+    if (!container) return;
+    const rect = container.getBoundingClientRect();
+    const relX = e.clientX - rect.left;
+    const relY = e.clientY - rect.top;
+    const w = rect.width;
+    const h = rect.height;
+
+    const normY = (relY / h - 0.5) * -2;
+    let amplitude = parseFloat(normY.toFixed(3));
+
+    const peaks = Array.isArray(data) ? data : (data?.peaks || []);
+    if (peaks.length > 0) {
+      const idx = Math.floor((relX / w) * peaks.length);
+      const clamped = Math.max(0, Math.min(peaks.length - 1, idx));
+      amplitude = parseFloat(((peaks[clamped].max + peaks[clamped].min) / 2).toFixed(3));
+    }
+
+    const timeSec = duration > 0 ? (relX / w) * duration : 0;
+    const timeLabel = duration > 0 ? `Time: ${timeSec.toFixed(3)}s` : `Pos: ${((relX / w) * 100).toFixed(1)}%`;
+    const label = `${timeLabel}  |  Amp: ${amplitude >= 0 ? '+' : ''}${amplitude}`;
+
+    const tipW = 180;
+    const tipX = relX + 12 + tipW > w ? relX - tipW - 8 : relX + 12;
+    const tipY = relY - 14;
+
+    setHover({ visible: true, x: tipX, y: tipY, label });
+  };
+
   return (
-    <div className="w-full h-24 bg-surface rounded-ios-lg relative overflow-hidden">
+    <div 
+      ref={containerRef}
+      className="w-full h-24 bg-surface rounded-ios-lg relative overflow-hidden cursor-crosshair"
+      onMouseMove={handleMouseMove}
+      onMouseLeave={() => setHover(h => ({ ...h, visible: false }))}
+    >
       {!data && (
         <div className="absolute inset-0 flex items-center justify-center text-[11px] text-ink-tertiary">
           Loading waveform...
@@ -68,6 +106,14 @@ function WaveformCanvas({ data, color, progressPct }: { data: WaveformData | nul
           className="absolute top-0 bottom-0 w-[1.5px] bg-[#e15241] z-10 pointer-events-none transition-all duration-75"
           style={{ left: `${progressPct}%` }}
         />
+      )}
+      {hover.visible && (
+        <div
+          className="absolute bg-ink-primary text-surface px-2.5 py-1 rounded-[10px] text-[11px] font-mono shadow-md pointer-events-none z-30 whitespace-nowrap transition-opacity duration-75"
+          style={{ left: hover.x, top: hover.y }}
+        >
+          {hover.label}
+        </div>
       )}
     </div>
   );
@@ -131,8 +177,59 @@ function FFTCanvas({ data, color, progressPct }: { data: FFTData | null, color: 
     }
   }, [data, color]);
 
+  const [hover, setHover] = useState({ visible: false, x: 0, y: 0, label: '' });
+  const containerRef = useRef<HTMLDivElement>(null);
+
+  const handleMouseMove = (e: React.MouseEvent<HTMLDivElement>) => {
+    const container = containerRef.current;
+    if (!container) return;
+    const rect = container.getBoundingClientRect();
+    const relX = e.clientX - rect.left;
+    const relY = e.clientY - rect.top;
+    const w = rect.width;
+    const h = rect.height;
+
+    const bars = 128;
+    const barIdx = Math.floor((relX / w) * bars);
+    let freqHz: number;
+    let magDb: number | null = null;
+
+    if (data && data.frequencies?.length > 0) {
+      const mags = data.magnitudes_db;
+      const freqs = data.frequencies;
+      const step = Math.floor(mags.length / bars);
+      const binIdx = Math.min(mags.length - 1, barIdx * step);
+      freqHz = freqs[binIdx] ?? 0;
+      magDb = mags[binIdx] ?? null;
+    } else {
+      freqHz = (barIdx / bars) * 20000;
+    }
+
+    if (magDb === null) {
+      const normFromY = 1 - (relY / h);
+      magDb = -80 + normFromY * 80;
+    }
+
+    const freqLabel = freqHz >= 1000
+      ? `Freq: ${(freqHz / 1000).toFixed(2)} kHz`
+      : `Freq: ${Math.round(freqHz)} Hz`;
+    const magLabel = `Mag: ${magDb.toFixed(1)} dB`;
+    const label = `${freqLabel}  |  ${magLabel}`;
+
+    const tipW = 220;
+    const tipX = relX + 12 + tipW > w ? relX - tipW - 8 : relX + 12;
+    const tipY = relY - 14;
+
+    setHover({ visible: true, x: tipX, y: tipY, label });
+  };
+
   return (
-    <div className="w-full h-24 bg-surface rounded-ios-lg relative overflow-hidden">
+    <div 
+      ref={containerRef}
+      className="w-full h-24 bg-surface rounded-ios-lg relative overflow-hidden cursor-crosshair"
+      onMouseMove={handleMouseMove}
+      onMouseLeave={() => setHover(h => ({ ...h, visible: false }))}
+    >
       {!data && (
         <div className="absolute inset-0 flex items-center justify-center text-[11px] text-ink-tertiary">
           Loading FFT...
@@ -144,6 +241,14 @@ function FFTCanvas({ data, color, progressPct }: { data: FFTData | null, color: 
           className="absolute top-0 bottom-0 w-[1.5px] bg-[#e15241] z-10 pointer-events-none transition-all duration-75"
           style={{ left: `${progressPct}%` }}
         />
+      )}
+      {hover.visible && (
+        <div
+          className="absolute bg-ink-primary text-surface px-2.5 py-1 rounded-[10px] text-[11px] font-mono shadow-md pointer-events-none z-30 whitespace-nowrap transition-opacity duration-75"
+          style={{ left: hover.x, top: hover.y }}
+        >
+          {hover.label}
+        </div>
       )}
     </div>
   );
@@ -190,11 +295,21 @@ export default function ComparisonSignalGraphs({ result, pvProgressPct, naivePro
         <div className="flex flex-col gap-4">
           <div className="flex flex-col gap-1.5">
             <span className="text-[12px] font-medium text-ink-secondary px-1">Phase Vocoder Output</span>
-            <WaveformCanvas data={pvWaveform} color="#4a7eb3" progressPct={pvProgressPct} />
+            <WaveformCanvas 
+              data={pvWaveform} 
+              color="#4a7eb3" 
+              progressPct={pvProgressPct} 
+              duration={result.metrics.pv.duration} 
+            />
           </div>
           <div className="flex flex-col gap-1.5">
             <span className="text-[12px] font-medium text-ink-secondary px-1">Naive Resampling Output</span>
-            <WaveformCanvas data={naiveWaveform} color="#786c8f" progressPct={naiveProgressPct} />
+            <WaveformCanvas 
+              data={naiveWaveform} 
+              color="#786c8f" 
+              progressPct={naiveProgressPct} 
+              duration={result.metrics.naive.duration} 
+            />
           </div>
         </div>
       </Card>

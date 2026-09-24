@@ -127,11 +127,11 @@ export default function NativeAudioPlayer({ url, title, className = '', onRestor
         {/* Minimalist Seek track */}
         <div
           ref={progressRef}
-          className="h-2 bg-[rgba(38,33,28,0.08)] hover:h-2.5 rounded-pill relative cursor-pointer flex items-center overflow-hidden transition-all duration-150"
+          className="h-2 bg-hairline hover:h-2.5 rounded-pill relative cursor-pointer flex items-center overflow-hidden transition-all duration-150"
           onMouseDown={handleMouseDown}
         >
           <div
-            className="absolute h-full left-0 top-0 bg-[#26211c] transition-all duration-75"
+            className="absolute h-full left-0 top-0 bg-ink-primary transition-all duration-75"
             style={{ width: `${progressPct}%` }}
           />
         </div>
@@ -143,7 +143,7 @@ export default function NativeAudioPlayer({ url, title, className = '', onRestor
             {/* Skip Back 10s */}
             <button
               onClick={() => seek(Math.max(0, currentTime - 10))}
-              className="w-7 h-7 rounded-ios-md flex items-center justify-center text-ink-primary/70 hover:text-ink-primary hover:bg-[rgba(38,33,28,0.06)] active:scale-[0.95] transition-all cursor-pointer"
+              className="w-7 h-7 rounded-ios-md flex items-center justify-center text-ink-primary/70 hover:text-ink-primary hover:bg-hairline active:scale-[0.95] transition-all cursor-pointer"
               title="Rewind 10s"
             >
               <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
@@ -154,7 +154,7 @@ export default function NativeAudioPlayer({ url, title, className = '', onRestor
             {/* Bordered Play/Pause */}
             <button
               onClick={togglePlay}
-              className="w-8 h-8 rounded-ios-md flex items-center justify-center text-ink-primary hover:bg-[rgba(38,33,28,0.06)] active:scale-[0.92] transition-all cursor-pointer select-none"
+              className="w-8 h-8 rounded-ios-md flex items-center justify-center text-ink-primary hover:bg-hairline active:scale-[0.92] transition-all cursor-pointer select-none"
               title={isPlaying ? 'Pause' : 'Play'}
             >
               {isPlaying ? (
@@ -172,7 +172,7 @@ export default function NativeAudioPlayer({ url, title, className = '', onRestor
             {/* Skip Forward 10s */}
             <button
               onClick={() => seek(Math.min(duration, currentTime + 10))}
-              className="w-7 h-7 rounded-ios-md flex items-center justify-center text-ink-primary/70 hover:text-ink-primary hover:bg-[rgba(38,33,28,0.06)] active:scale-[0.95] transition-all cursor-pointer"
+              className="w-7 h-7 rounded-ios-md flex items-center justify-center text-ink-primary/70 hover:text-ink-primary hover:bg-hairline active:scale-[0.95] transition-all cursor-pointer"
               title="Forward 10s"
             >
               <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
@@ -183,7 +183,7 @@ export default function NativeAudioPlayer({ url, title, className = '', onRestor
             {/* Stop */}
             <button
               onClick={stop}
-              className="w-7 h-7 rounded-ios-md flex items-center justify-center text-ink-primary/80 hover:text-ink-primary hover:bg-[rgba(38,33,28,0.06)] active:scale-[0.95] transition-all cursor-pointer"
+              className="w-7 h-7 rounded-ios-md flex items-center justify-center text-ink-primary/80 hover:text-ink-primary hover:bg-hairline active:scale-[0.95] transition-all cursor-pointer"
               title="Stop"
             >
               <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
@@ -196,7 +196,7 @@ export default function NativeAudioPlayer({ url, title, className = '', onRestor
           <div className="flex items-center gap-1 shrink-0">
             <button 
               type="button"
-              className="w-6 h-6 rounded-ios-md flex items-center justify-center text-ink-primary/70 hover:text-ink-primary hover:bg-[rgba(38,33,28,0.06)] active:scale-[0.95] cursor-pointer transition-all shrink-0"
+              className="w-6 h-6 rounded-ios-md flex items-center justify-center text-ink-primary/70 hover:text-ink-primary hover:bg-hairline active:scale-[0.95] cursor-pointer transition-all shrink-0"
               onClick={() => setVolume(volume > 0 ? 0 : 1)}
               title={volume === 0 ? "Unmute" : "Mute"}
             >
@@ -249,7 +249,7 @@ export default function NativeAudioPlayer({ url, title, className = '', onRestor
           <button
             type="button"
             onClick={onRestoreOriginal}
-            className="px-4 py-1.5 rounded-full bg-[#26211c] text-white text-[12px] font-semibold tracking-tight hover:bg-[#1a1713] active:scale-[0.97] transition-all cursor-pointer select-none"
+            className="px-4 py-1.5 rounded-full bg-ink-primary text-surface text-[12px] font-semibold tracking-tight hover:bg-ink-primary active:scale-[0.97] transition-all cursor-pointer select-none"
           >
             Restore to Original
           </button>

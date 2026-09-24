@@ -1,4 +1,4 @@
-import { useRef, useEffect } from 'react';
+import { useRef, useEffect, useState } from 'react';
 import { useAnalyserNode } from '../../hooks/useAudioEngine';
 import { useAudioStore } from '../../store/useAudioStore';
 
@@ -11,9 +11,9 @@ interface AnimatedSignalGraphProps {
   } | null;
 }
 
-const GRID_COLOR = 'rgba(38, 33, 28, 0.05)';
-const BASELINE_COLOR = 'rgba(38, 33, 28, 0.12)';
-const WAVE_STROKE = '#26211c';
+
+
+
 const GRID_STEP = 36;
 
 function clamp(v: number, lo: number, hi: number) {
@@ -58,7 +58,7 @@ function waveformY(type: string, u: number, cycles: number, phase: number): numb
 
 export default function AnimatedSignalGraph({ previewSignal }: AnimatedSignalGraphProps = {}) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
-  const { isPlaying } = useAudioStore();
+  const { isPlaying , theme } = useAudioStore();
   const analyserNode = useAnalyserNode();
 
   const previewRef = useRef(previewSignal);
@@ -104,7 +104,7 @@ export default function AnimatedSignalGraph({ previewSignal }: AnimatedSignalGra
 
     const drawGrid = (w: number, h: number) => {
       ctx.save();
-      ctx.strokeStyle = GRID_COLOR;
+      ctx.strokeStyle = (theme === 'dark' ? 'rgba(229, 231, 235, 0.05)' : 'rgba(38, 33, 28, 0.05)');
       ctx.lineWidth = 1;
       ctx.beginPath();
       for (let x = GRID_STEP; x < w; x += GRID_STEP) {
@@ -118,7 +118,7 @@ export default function AnimatedSignalGraph({ previewSignal }: AnimatedSignalGra
       ctx.stroke();
 
       // Center baseline
-      ctx.strokeStyle = BASELINE_COLOR;
+      ctx.strokeStyle = (theme === 'dark' ? 'rgba(229, 231, 235, 0.12)' : 'rgba(38, 33, 28, 0.12)');
       ctx.beginPath();
       ctx.moveTo(0, h / 2);
       ctx.lineTo(w, h / 2);
@@ -150,7 +150,7 @@ export default function AnimatedSignalGraph({ previewSignal }: AnimatedSignalGra
 
         ctx.beginPath();
         ctx.lineWidth = 1.75;
-        ctx.strokeStyle = WAVE_STROKE;
+        ctx.strokeStyle = (theme === 'dark' ? '#E5E7EB' : '#26211c');
         ctx.lineJoin = 'round';
 
         const sliceW = w / buffer.length;
@@ -172,7 +172,7 @@ export default function AnimatedSignalGraph({ previewSignal }: AnimatedSignalGra
 
         ctx.beginPath();
         ctx.lineWidth = 1.75;
-        ctx.strokeStyle = WAVE_STROKE;
+        ctx.strokeStyle = (theme === 'dark' ? '#E5E7EB' : '#26211c');
         ctx.lineJoin = 'round';
 
         for (let i = 0; i <= pts; i++) {
@@ -189,7 +189,7 @@ export default function AnimatedSignalGraph({ previewSignal }: AnimatedSignalGra
 
       // Idle flat line
       ctx.beginPath();
-      ctx.strokeStyle = BASELINE_COLOR;
+      ctx.strokeStyle = (theme === 'dark' ? 'rgba(229, 231, 235, 0.12)' : 'rgba(38, 33, 28, 0.12)');
       ctx.lineWidth = 1.5;
       ctx.moveTo(0, h / 2);
       ctx.lineTo(w, h / 2);
@@ -204,14 +204,61 @@ export default function AnimatedSignalGraph({ previewSignal }: AnimatedSignalGra
     };
   }, []);
 
+  const [hover, setHover] = useState({ visible: false, x: 0, y: 0, label: '' });
+  const containerRef = useRef<HTMLDivElement>(null);
+  const { duration } = useAudioStore();
+
+  const handleMouseMove = (e: React.MouseEvent<HTMLDivElement>) => {
+    const container = containerRef.current;
+    if (!container) return;
+    const rect = container.getBoundingClientRect();
+    const relX = e.clientX - rect.left;
+    const relY = e.clientY - rect.top;
+    const w = rect.width;
+    const h = rect.height;
+
+    // Amplitude from Y
+    const normY = (relY / h - 0.5) * -2;
+    let amplitude = parseFloat(normY.toFixed(3));
+    
+    let timeLabel = 'Time: Live';
+    if (previewSignal && previewSignal.duration) {
+       timeLabel = `Time: ${((relX / w) * previewSignal.duration).toFixed(3)}s`;
+    } else if (duration > 0) {
+       timeLabel = `Time: ${((relX / w) * duration).toFixed(3)}s`;
+    }
+
+    const ampLabel = `Amp: ${amplitude >= 0 ? '+' : ''}${amplitude}`;
+    const label = `${timeLabel}  |  ${ampLabel}`;
+
+    const tipW = 200;
+    const tipX = relX + 12 + tipW > w ? relX - tipW - 8 : relX + 12;
+    const tipY = relY - 14;
+
+    setHover({ visible: true, x: tipX, y: tipY, label });
+  };
+
   return (
     <div className="w-full h-44 bg-surface rounded-ios-2xl p-4 flex flex-col">
       <div className="flex items-center justify-between mb-2">
         <h4 className="text-[12px] font-semibold text-ink-secondary">LIVE SIGNAL GRAPH</h4>
         <span className="text-[10px] text-ink-tertiary">Time Domain</span>
       </div>
-      <div className="flex-1 bg-surface overflow-hidden relative">
+      <div 
+        ref={containerRef}
+        className="flex-1 bg-surface overflow-hidden relative cursor-crosshair"
+        onMouseMove={handleMouseMove}
+        onMouseLeave={() => setHover(h => ({ ...h, visible: false }))}
+      >
         <canvas ref={canvasRef} className="w-full h-full bg-surface" />
+        {hover.visible && (
+          <div
+            className="absolute bg-ink-primary text-surface px-2.5 py-1 rounded-[10px] text-[11px] font-mono shadow-md pointer-events-none z-30 whitespace-nowrap transition-opacity duration-75"
+            style={{ left: hover.x, top: hover.y }}
+          >
+            {hover.label}
+          </div>
+        )}
       </div>
     </div>
   );

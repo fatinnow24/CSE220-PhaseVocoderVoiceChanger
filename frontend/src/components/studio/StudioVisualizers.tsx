@@ -1,11 +1,13 @@
-import { useRef, useEffect } from 'react';
+import { useRef, useEffect, useState, useCallback } from 'react';
 import { useAnalyserNode } from '../../hooks/useAudioEngine';
 import { useWaveformCanvas } from '../../hooks/useWaveformCanvas';
 import { useAudioStore } from '../../store/useAudioStore';
 
 export function StudioWaveform() {
   const canvasRef = useRef<HTMLCanvasElement>(null);
-  const { waveformData, currentTime, duration } = useAudioStore();
+  const containerRef = useRef<HTMLDivElement>(null);
+  const { waveformData, currentTime, duration, theme } = useAudioStore();
+  const [hover, setHover] = useState({ visible: false, x: 0, y: 0, label: '' });
 
   useWaveformCanvas({
     canvasRef,
@@ -13,19 +15,71 @@ export function StudioWaveform() {
     currentTime,
     duration,
     selection: null,
-    color: '#26211c',
+    color: theme === 'dark' ? '#E5E7EB' : '#1f2328',
   });
 
+  const handleMouseMove = useCallback((e: React.MouseEvent<HTMLDivElement>) => {
+    const container = containerRef.current;
+    if (!container) return;
+    const rect = container.getBoundingClientRect();
+    const relX = e.clientX - rect.left;
+    const relY = e.clientY - rect.top;
+    const w = rect.width;
+    const h = rect.height;
+
+    let timeSec: number | null = null;
+    let amplitude: number | null = null;
+
+    if (duration > 0) {
+      timeSec = (relX / w) * duration;
+    }
+
+    const normY = (relY / h - 0.5) * -2;
+    amplitude = parseFloat(normY.toFixed(3));
+
+    const peaks: Array<{ min: number; max: number }> = Array.isArray(waveformData)
+      ? (waveformData as any)
+      : (waveformData?.peaks || []);
+    if (peaks.length > 0) {
+      const idx = Math.floor((relX / w) * peaks.length);
+      const clamped = Math.max(0, Math.min(peaks.length - 1, idx));
+      amplitude = parseFloat(((peaks[clamped].max + peaks[clamped].min) / 2).toFixed(3));
+    }
+
+    const timeLabel = timeSec !== null ? `Time: ${timeSec.toFixed(3)}s` : 'Time: --';
+    const ampLabel = amplitude !== null ? `Amp: ${amplitude >= 0 ? '+' : ''}${amplitude}` : '';
+    const label = [timeLabel, ampLabel].filter(Boolean).join('  |  ');
+
+    const tipW = 200;
+    const tipX = relX + 12 + tipW > w ? relX - tipW - 8 : relX + 12;
+    const tipY = relY - 14;
+
+    setHover({ visible: true, x: tipX, y: tipY, label });
+  }, [waveformData, duration]);
+
   return (
-    <div className="bg-[#f0ead8] rounded-[24px] p-5 flex flex-col justify-between h-[180px] shadow-none select-none">
+    <div className="bg-pastel-cream rounded-[24px] p-5 flex flex-col justify-between h-[180px] shadow-none select-none">
       <div className="flex items-center justify-between">
-        <h3 className="text-[17px] font-semibold text-[#26211c] tracking-tight">Waveform</h3>
-        <span className="text-[12px] font-medium text-[#57534e]">
+        <h3 className="text-[17px] font-semibold text-ink-primary tracking-tight">Waveform</h3>
+        <span className="text-[12px] font-medium text-ink-secondary">
           Overview
         </span>
       </div>
-      <div className="w-full h-[105px] relative mt-1">
+      <div 
+        ref={containerRef}
+        className="w-full h-[105px] relative mt-1 cursor-crosshair"
+        onMouseMove={handleMouseMove}
+        onMouseLeave={() => setHover(h => ({ ...h, visible: false }))}
+      >
         <canvas ref={canvasRef} className="w-full h-full" />
+        {hover.visible && (
+          <div
+            className="absolute bg-ink-primary text-surface px-2.5 py-1 rounded-[10px] text-[11px] font-mono shadow-md pointer-events-none z-30 whitespace-nowrap transition-opacity duration-75"
+            style={{ left: hover.x, top: hover.y }}
+          >
+            {hover.label}
+          </div>
+        )}
       </div>
     </div>
   );
@@ -33,7 +87,7 @@ export function StudioWaveform() {
 
 export function StudioLiveSignal() {
   const canvasRef = useRef<HTMLCanvasElement>(null);
-  const { isPlaying } = useAudioStore();
+  const { isPlaying, theme } = useAudioStore();
   const analyserNode = useAnalyserNode();
 
   useEffect(() => {
@@ -74,7 +128,7 @@ export function StudioLiveSignal() {
         analyserNode.getByteTimeDomainData(buffer as any);
 
         ctx.lineWidth = 1.5;
-        ctx.strokeStyle = '#26211c';
+        ctx.strokeStyle = theme === 'dark' ? '#E5E7EB' : '#1f2328';
         ctx.beginPath();
 
         const sliceWidth = w / buffer.length;
@@ -107,18 +161,57 @@ export function StudioLiveSignal() {
       cancelAnimationFrame(animId);
       ro.disconnect();
     };
-  }, [isPlaying, analyserNode]);
+  }, [isPlaying, analyserNode, theme]);
+
+  const [hover, setHover] = useState({ visible: false, x: 0, y: 0, label: '' });
+  const containerRef = useRef<HTMLDivElement>(null);
+
+  const handleMouseMove = useCallback((e: React.MouseEvent<HTMLDivElement>) => {
+    const container = containerRef.current;
+    if (!container) return;
+    const rect = container.getBoundingClientRect();
+    const relX = e.clientX - rect.left;
+    const relY = e.clientY - rect.top;
+    const w = rect.width;
+    const h = rect.height;
+
+    const normY = (relY / h - 0.5) * -2;
+    const amplitude = parseFloat(normY.toFixed(3));
+
+    const timeLabel = 'Time: Live';
+    const ampLabel = `Amp: ${amplitude >= 0 ? '+' : ''}${amplitude}`;
+    const label = `${timeLabel}  |  ${ampLabel}`;
+
+    const tipW = 200;
+    const tipX = relX + 12 + tipW > w ? relX - tipW - 8 : relX + 12;
+    const tipY = relY - 14;
+
+    setHover({ visible: true, x: tipX, y: tipY, label });
+  }, []);
 
   return (
-    <div className="bg-[#dce6f0] rounded-[24px] p-5 flex flex-col justify-between h-[180px] shadow-none select-none">
+    <div className="bg-pastel-blue rounded-[24px] p-5 flex flex-col justify-between h-[180px] shadow-none select-none">
       <div className="flex items-center justify-between">
-        <h3 className="text-[17px] font-semibold text-[#26211c] tracking-tight">Live Oscilloscope</h3>
-        <span className="text-[12px] font-medium text-[#57534e]">
+        <h3 className="text-[17px] font-semibold text-ink-primary tracking-tight">Live Oscilloscope</h3>
+        <span className="text-[12px] font-medium text-ink-secondary">
           Real-time
         </span>
       </div>
-      <div className="w-full h-[105px] relative mt-1">
+      <div 
+        ref={containerRef}
+        className="w-full h-[105px] relative mt-1 cursor-crosshair"
+        onMouseMove={handleMouseMove}
+        onMouseLeave={() => setHover(h => ({ ...h, visible: false }))}
+      >
         <canvas ref={canvasRef} className="w-full h-full" />
+        {hover.visible && (
+          <div
+            className="absolute bg-ink-primary text-surface px-2.5 py-1 rounded-[10px] text-[11px] font-mono shadow-md pointer-events-none z-30 whitespace-nowrap transition-opacity duration-75"
+            style={{ left: hover.x, top: hover.y }}
+          >
+            {hover.label}
+          </div>
+        )}
       </div>
     </div>
   );
@@ -126,7 +219,7 @@ export function StudioLiveSignal() {
 
 export function StudioLiveSpectrum() {
   const canvasRef = useRef<HTMLCanvasElement>(null);
-  const { isPlaying, fftData } = useAudioStore();
+  const { isPlaying, fftData, theme } = useAudioStore();
   const analyserNode = useAnalyserNode();
 
   useEffect(() => {
@@ -173,7 +266,7 @@ export function StudioLiveSpectrum() {
           const x = i * (barW + 2);
           const y = h - barH;
 
-          ctx.fillStyle = '#26211c';
+          ctx.fillStyle = theme === 'dark' ? '#E5E7EB' : '#1f2328';
           ctx.beginPath();
           ctx.roundRect(x, y, barW, barH, [1.5, 1.5, 0, 0]);
           ctx.fill();
@@ -187,7 +280,7 @@ export function StudioLiveSpectrum() {
           const x = i * (barW + 2);
           const y = h - barH;
 
-          ctx.fillStyle = '#26211c';
+          ctx.fillStyle = theme === 'dark' ? '#E5E7EB' : '#1f2328';
           ctx.beginPath();
           ctx.roundRect(x, y, barW, barH, [1.5, 1.5, 0, 0]);
           ctx.fill();
@@ -204,18 +297,82 @@ export function StudioLiveSpectrum() {
       cancelAnimationFrame(animId);
       ro.disconnect();
     };
-  }, [isPlaying, analyserNode, fftData]);
+  }, [isPlaying, analyserNode, fftData, theme]);
+
+  const [hover, setHover] = useState({ visible: false, x: 0, y: 0, label: '' });
+  const containerRef = useRef<HTMLDivElement>(null);
+  const SAMPLE_RATE = 44100;
+  const MAX_FREQ_LIVE = SAMPLE_RATE / 2;
+
+  const handleMouseMove = useCallback((e: React.MouseEvent<HTMLDivElement>) => {
+    const container = containerRef.current;
+    if (!container) return;
+    const rect = container.getBoundingClientRect();
+    const relX = e.clientX - rect.left;
+    const relY = e.clientY - rect.top;
+    const w = rect.width;
+    const h = rect.height;
+
+    const bars = 48;
+    const barIdx = Math.floor((relX / w) * bars);
+    let freqHz: number;
+    let magDb: number | null = null;
+
+    if (fftData && fftData.frequencies?.length > 0) {
+      const mags = fftData.magnitudes_db;
+      const freqs = fftData.frequencies;
+      const step = Math.floor(mags.length / bars);
+      const binIdx = Math.min(mags.length - 1, barIdx * step);
+      freqHz = freqs[binIdx] ?? 0;
+      magDb = mags[binIdx] ?? null;
+    } else if (isPlaying && analyserNode) {
+      const barFrac = Math.pow(barIdx / bars, 1.8) * 0.7;
+      freqHz = barFrac * MAX_FREQ_LIVE;
+    } else {
+      freqHz = (barIdx / bars) * 20000;
+    }
+
+    if (magDb === null) {
+      const normFromY = 1 - (relY / h);
+      magDb = -80 + normFromY * 80;
+    }
+
+    const freqLabel = freqHz >= 1000
+      ? `Freq: ${(freqHz / 1000).toFixed(2)} kHz`
+      : `Freq: ${Math.round(freqHz)} Hz`;
+    const magLabel = `Mag: ${magDb.toFixed(1)} dB`;
+    const label = `${freqLabel}  |  ${magLabel}`;
+
+    const tipW = 220;
+    const tipX = relX + 12 + tipW > w ? relX - tipW - 8 : relX + 12;
+    const tipY = relY - 14;
+
+    setHover({ visible: true, x: tipX, y: tipY, label });
+  }, [fftData, isPlaying, analyserNode]);
 
   return (
-    <div className="bg-[#e5e3e8] rounded-[24px] p-5 flex flex-col justify-between h-[180px] shadow-none select-none">
+    <div className="bg-pastel-lavender rounded-[24px] p-5 flex flex-col justify-between h-[180px] shadow-none select-none">
       <div className="flex items-center justify-between">
-        <h3 className="text-[17px] font-semibold text-[#26211c] tracking-tight">Spectrum (FFT)</h3>
-        <span className="text-[12px] font-medium text-[#57534e]">
+        <h3 className="text-[17px] font-semibold text-ink-primary tracking-tight">Spectrum (FFT)</h3>
+        <span className="text-[12px] font-medium text-ink-secondary">
           Frequency
         </span>
       </div>
-      <div className="w-full h-[105px] relative mt-1">
+      <div 
+        ref={containerRef}
+        className="w-full h-[105px] relative mt-1 cursor-crosshair"
+        onMouseMove={handleMouseMove}
+        onMouseLeave={() => setHover(h => ({ ...h, visible: false }))}
+      >
         <canvas ref={canvasRef} className="w-full h-full" />
+        {hover.visible && (
+          <div
+            className="absolute bg-ink-primary text-surface px-2.5 py-1 rounded-[10px] text-[11px] font-mono shadow-md pointer-events-none z-30 whitespace-nowrap transition-opacity duration-75"
+            style={{ left: hover.x, top: hover.y }}
+          >
+            {hover.label}
+          </div>
+        )}
       </div>
     </div>
   );

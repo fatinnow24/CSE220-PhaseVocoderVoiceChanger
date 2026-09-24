@@ -1,7 +1,8 @@
 import { useRef, useEffect, useState } from 'react';
 import { useAudioEngine } from '../../hooks/useAudioEngine';
 import { useAudioStore } from '../../store/useAudioStore';
-import { getWaveform, getSpectrogram } from '../../api/client';
+import { getWaveform, getSpectrogram, getFFT } from '../../api/client';
+
 
 interface AudioPlayerProps {
   url: string | null;
@@ -16,8 +17,10 @@ export default function AudioPlayer({ url, title }: AudioPlayerProps) {
     setVolume, setPlaybackRate,
     selectedFile, originalFile,
     restoreToOriginal,
-    setWaveformData, setSpectrogramData,
+    setWaveformData, setSpectrogramData, setFFTData,
+    audioHistory, popAudioHistory,
   } = useAudioStore();
+
   const [showRateMenu, setShowRateMenu] = useState(false);
   const rateMenuRef = useRef<HTMLDivElement>(null);
   const progressRef = useRef<HTMLDivElement>(null);
@@ -92,11 +95,23 @@ export default function AudioPlayer({ url, title }: AudioPlayerProps) {
       // Refresh waveform/spectrogram for the original file
       getWaveform(originalFile.id, 1200).then(r => setWaveformData(r.data.data)).catch(() => {});
       getSpectrogram(originalFile.id).then(r => setSpectrogramData(r.data.data)).catch(() => {});
+      getFFT(originalFile.id).then(r => setFFTData(r.data.data || r.data)).catch(() => {});
     }
   };
 
+  const handlePopHistory = async () => {
+    const restoredFile = popAudioHistory();
+    if (restoredFile) {
+      getWaveform(restoredFile.id, 1200).then(r => setWaveformData(r.data.data)).catch(() => {});
+      getSpectrogram(restoredFile.id).then(r => setSpectrogramData(r.data.data)).catch(() => {});
+      getFFT(restoredFile.id).then(r => setFFTData(r.data.data || r.data)).catch(() => {});
+    }
+  };
+
+  const showPopButton = audioHistory.length > 0;
   const progressPct = duration > 0 ? (currentTime / duration) * 100 : 0;
   const rates = [0.5, 0.75, 1, 1.25, 1.5, 2];
+
 
   return (
     <div className="flex flex-col gap-0 select-none">
@@ -115,11 +130,11 @@ export default function AudioPlayer({ url, title }: AudioPlayerProps) {
         {/* Minimalist Seek track */}
         <div
           ref={progressRef}
-          className="h-2 bg-[rgba(38,33,28,0.08)] hover:h-3 rounded-pill relative cursor-pointer flex items-center overflow-hidden transition-all duration-150"
+          className="h-2 bg-hairline hover:h-3 rounded-pill relative cursor-pointer flex items-center overflow-hidden transition-all duration-150"
           onMouseDown={handleMouseDown}
         >
           <div
-            className="absolute h-full left-0 top-0 bg-[#26211c] transition-all duration-75"
+            className="absolute h-full left-0 top-0 bg-ink-primary transition-all duration-75"
             style={{ width: `${progressPct}%` }}
           />
         </div>
@@ -130,7 +145,7 @@ export default function AudioPlayer({ url, title }: AudioPlayerProps) {
             {/* Custom Skip Back 10s */}
             <button
               onClick={() => seek(Math.max(0, currentTime - 10))}
-              className="w-8 h-8 rounded-ios-md flex items-center justify-center text-ink-primary/70 hover:text-ink-primary hover:bg-[rgba(38,33,28,0.06)] active:scale-[0.95] transition-all cursor-pointer"
+              className="w-8 h-8 rounded-ios-md flex items-center justify-center text-ink-primary/70 hover:text-ink-primary hover:bg-hairline active:scale-[0.95] transition-all cursor-pointer"
               title="Rewind 10s"
             >
               <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
@@ -141,7 +156,7 @@ export default function AudioPlayer({ url, title }: AudioPlayerProps) {
             {/* Bordered Play/Pause with Rounded Corners */}
             <button
               onClick={isPlaying ? pause : play}
-              className="w-9 h-9 rounded-ios-md flex items-center justify-center text-ink-primary hover:bg-[rgba(38,33,28,0.06)] active:scale-[0.92] transition-all cursor-pointer select-none"
+              className="w-9 h-9 rounded-ios-md flex items-center justify-center text-ink-primary hover:bg-hairline active:scale-[0.92] transition-all cursor-pointer select-none"
               title={isPlaying ? 'Pause' : 'Play'}
             >
               {isPlaying ? (
@@ -159,7 +174,7 @@ export default function AudioPlayer({ url, title }: AudioPlayerProps) {
             {/* Custom Skip Forward 10s */}
             <button
               onClick={() => seek(Math.min(duration, currentTime + 10))}
-              className="w-8 h-8 rounded-ios-md flex items-center justify-center text-ink-primary/70 hover:text-ink-primary hover:bg-[rgba(38,33,28,0.06)] active:scale-[0.95] transition-all cursor-pointer"
+              className="w-8 h-8 rounded-ios-md flex items-center justify-center text-ink-primary/70 hover:text-ink-primary hover:bg-hairline active:scale-[0.95] transition-all cursor-pointer"
               title="Forward 10s"
             >
               <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
@@ -170,7 +185,7 @@ export default function AudioPlayer({ url, title }: AudioPlayerProps) {
             {/* Bordered Stop with Rounded Corners */}
             <button
               onClick={stop}
-              className="w-8 h-8 rounded-ios-md flex items-center justify-center text-ink-primary/80 hover:text-ink-primary hover:bg-[rgba(38,33,28,0.06)] active:scale-[0.95] transition-all cursor-pointer"
+              className="w-8 h-8 rounded-ios-md flex items-center justify-center text-ink-primary/80 hover:text-ink-primary hover:bg-hairline active:scale-[0.95] transition-all cursor-pointer"
               title="Stop"
             >
               <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
@@ -183,7 +198,7 @@ export default function AudioPlayer({ url, title }: AudioPlayerProps) {
             <div className="flex items-center gap-1.5">
               <button 
                 type="button"
-                className="w-7 h-7 rounded-ios-md flex items-center justify-center text-ink-primary/70 hover:text-ink-primary hover:bg-[rgba(38,33,28,0.06)] active:scale-[0.95] cursor-pointer transition-all shrink-0"
+                className="w-7 h-7 rounded-ios-md flex items-center justify-center text-ink-primary/70 hover:text-ink-primary hover:bg-hairline active:scale-[0.95] cursor-pointer transition-all shrink-0"
                 onClick={() => setVolume(volume > 0 ? 0 : 1)}
                 title={volume === 0 ? "Unmute" : "Mute"}
               >
@@ -224,7 +239,7 @@ export default function AudioPlayer({ url, title }: AudioPlayerProps) {
               </button>
 
               {showRateMenu && (
-                <div className="absolute bottom-full right-0 mb-2 py-1 bg-surface-raised border border-[rgba(38,33,28,0.12)] rounded-ios-lg shadow-ios-md flex flex-col z-30 min-w-[70px] animate-fadeIn">
+                <div className="absolute bottom-full right-0 mb-2 py-1 bg-surface-raised border border-hairline rounded-ios-lg shadow-ios-md flex flex-col z-30 min-w-[70px] animate-fadeIn">
                   {rates.map(r => {
                     const isSelected = r === playbackRate;
                     return (
@@ -237,7 +252,7 @@ export default function AudioPlayer({ url, title }: AudioPlayerProps) {
                         }}
                         className={`text-[12px] px-3 py-1.5 text-right cursor-pointer transition-colors ${
                           isSelected
-                            ? 'font-semibold text-ink-primary bg-[rgba(38,33,28,0.06)]'
+                            ? 'font-semibold text-ink-primary bg-hairline'
                             : 'font-normal text-ink-secondary hover:text-ink-primary hover:bg-[rgba(38,33,28,0.04)]'
                         }`}
                       >
@@ -252,16 +267,31 @@ export default function AudioPlayer({ url, title }: AudioPlayerProps) {
         </div>
       </div>
 
-      {/* Restore to Original button — shown below the player when effects have been applied */}
-      {showRestoreButton && (
-        <div className="flex justify-end pt-1.5 pr-1">
-          <button
-            type="button"
-            onClick={handleRestore}
-            className="px-4 py-1.5 rounded-full bg-[#26211c] text-white text-[12px] font-semibold tracking-tight hover:bg-[#1a1713] active:scale-[0.97] transition-all cursor-pointer select-none"
-          >
-            Restore to Original
-          </button>
+      {/* Action buttons — shown below the player when effects have been applied */}
+      {(showRestoreButton || showPopButton) && (
+        <div className="flex items-center justify-between pt-1.5 px-1">
+          <div>
+            {showPopButton && (
+              <button
+                type="button"
+                onClick={handlePopHistory}
+                className="px-4 py-1.5 rounded-full bg-ink-primary text-surface text-[12px] font-semibold tracking-tight hover:bg-ink-primary active:scale-[0.97] transition-all cursor-pointer select-none"
+              >
+                Remove Last Applied Effect
+              </button>
+            )}
+          </div>
+          <div>
+            {showRestoreButton && (
+              <button
+                type="button"
+                onClick={handleRestore}
+                className="px-4 py-1.5 rounded-full bg-ink-primary text-surface text-[12px] font-semibold tracking-tight hover:bg-ink-primary active:scale-[0.97] transition-all cursor-pointer select-none"
+              >
+                Restore to Original
+              </button>
+            )}
+          </div>
         </div>
       )}
     </div>

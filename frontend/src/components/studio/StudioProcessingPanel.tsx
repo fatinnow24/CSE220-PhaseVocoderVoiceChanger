@@ -83,23 +83,23 @@ export default function StudioProcessingPanel() {
   const hasChanges = pitchShift !== 0 || timeStretch !== 1.0;
 
   return (
-    <div className="bg-[#f0e3db] rounded-[24px] p-6 flex flex-col gap-5 select-none shadow-none">
+    <div className="bg-pastel-peach rounded-[24px] p-6 flex flex-col gap-5 select-none shadow-none">
       <div className="flex items-center justify-between">
         <div>
-          <h2 className="text-[20px] font-semibold text-[#26211c] tracking-tight">Phase Vocoder Engine</h2>
-          <p className="text-[12px] text-[#57534e] mt-0.5">Independent pitch scaling and time-compression</p>
+          <h2 className="text-[20px] font-semibold text-ink-primary tracking-tight">Phase Vocoder Engine</h2>
+          <p className="text-[12px] text-ink-secondary mt-0.5">Independent pitch scaling and time-compression</p>
         </div>
         <div className="flex items-center gap-2">
           <button
             onClick={handleReset}
             disabled={!hasChanges}
-            className="flex items-center gap-1.5 px-2.5 py-1 -mr-1 rounded-ios-md text-[12px] font-medium text-[#57534e] hover:text-[#26211c] hover:bg-[rgba(38,33,28,0.06)] active:bg-[rgba(38,33,28,0.12)] active:scale-[0.97] transition-all cursor-pointer disabled:opacity-30 disabled:pointer-events-none"
+            className="flex items-center gap-1.5 px-2.5 py-1 -mr-1 rounded-ios-md text-[12px] font-medium text-ink-secondary hover:text-ink-primary hover:bg-hairline active:bg-hairline active:scale-[0.97] transition-all cursor-pointer disabled:opacity-30 disabled:pointer-events-none"
             title="Reset parameters to default"
           >
             <span className="material-symbols-outlined text-[15px]">restart_alt</span>
             <span>Reset</span>
           </button>
-          <span className="text-[12px] font-medium text-[#57534e]">
+          <span className="text-[12px] font-medium text-ink-secondary">
             DSP Core
           </span>
         </div>
@@ -135,7 +135,7 @@ export default function StudioProcessingPanel() {
       <div className="pt-1">
         <button
           onClick={() => setAdvancedOpen(!advancedOpen)}
-          className="flex items-center gap-1.5 text-[12px] font-medium text-[#57534e] hover:text-[#26211c] transition-colors"
+          className="flex items-center gap-1.5 text-[12px] font-medium text-ink-secondary hover:text-ink-primary transition-colors"
         >
           <span className="material-symbols-outlined text-[16px] transition-transform duration-200" style={{ transform: advancedOpen ? 'rotate(90deg)' : 'none' }}>
             chevron_right
@@ -199,7 +199,7 @@ export default function StudioProcessingPanel() {
           icon="restart_alt"
           onClick={handleReset}
           disabled={!hasChanges}
-          className="shrink-0 bg-transparent hover:bg-[rgba(38,33,28,0.06)]"
+          className="shrink-0 bg-transparent hover:bg-hairline"
         >
           Reset
         </Button>

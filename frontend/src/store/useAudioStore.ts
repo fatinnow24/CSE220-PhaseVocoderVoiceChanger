@@ -1,13 +1,16 @@
 import { create } from 'zustand';
+import { persist } from 'zustand/middleware';
 import { AudioFile, AudioAnalysis, WaveformData, FFTData, SpectrogramData, ComparisonResult, Effect, EffectPreset, ProcessingStatus } from '../types';
 
 interface AudioStore {
   theme: 'light' | 'dark';
   setTheme: (theme: 'light' | 'dark') => void;
-  
+
   files: AudioFile[];
   selectedFile: AudioFile | null;
   originalFile: AudioFile | null;
+  /** Stack of previously selected (pre-effect) files, enabling LIFO "Remove Last Applied Effect" */
+  audioHistory: AudioFile[];
   isPlaying: boolean;
   currentTime: number;
   duration: number;
@@ -54,22 +57,29 @@ interface AudioStore {
   clearFiles: () => void;
   setOriginalFile: (f: AudioFile | null) => void;
   restoreToOriginal: () => void;
+  /** Push current selectedFile onto audioHistory before replacing with a new processed file */
+  pushAudioHistory: () => void;
+  /** Pop the last-processed file off audioHistory, restoring previous state (LIFO) */
+  popAudioHistory: () => AudioFile | null;
 }
 
-export const useAudioStore = create<AudioStore>((set) => ({
-  theme: 'light',
-  setTheme: (newTheme: 'light' | 'dark') => set(() => {
-    if (newTheme === 'dark') {
-      document.documentElement.classList.add('dark');
-    } else {
-      document.documentElement.classList.remove('dark');
-    }
-    return { theme: newTheme };
-  }),
+export const useAudioStore = create<AudioStore>()(
+  persist(
+    (set, get) => ({
+      theme: 'light',
+      setTheme: (newTheme: 'light' | 'dark') => {
+        if (newTheme === 'dark') {
+          document.documentElement.classList.add('dark');
+        } else {
+          document.documentElement.classList.remove('dark');
+        }
+        set({ theme: newTheme });
+      },
 
   files: [],
   selectedFile: null,
   originalFile: null,
+  audioHistory: [],
   isPlaying: false,
   currentTime: 0,
   duration: 0,
@@ -137,6 +147,7 @@ export const useAudioStore = create<AudioStore>((set) => ({
     files: [],
     selectedFile: null,
     originalFile: null,
+    audioHistory: [],
     processedFiles: [],
     analysis: null,
     waveformData: null,
@@ -152,11 +163,45 @@ export const useAudioStore = create<AudioStore>((set) => ({
     if (!orig) return {};
     return {
       selectedFile: orig,
+      audioHistory: [],
       waveformData: null,
       spectrogramData: null,
+      fftData: null,
       analysis: null,
       comparisonResult: null,
     };
   }),
 
-}));
+  pushAudioHistory: () => set((state) => {
+    if (!state.selectedFile) return {};
+    return { audioHistory: [...state.audioHistory, state.selectedFile] };
+  }),
+
+  popAudioHistory: () => {
+    const state = get();
+    if (state.audioHistory.length === 0) return null;
+    const history = [...state.audioHistory];
+    const poppedFile = history.pop()!;
+    const newEffectChain = state.effectChain.length > 0
+      ? state.effectChain.slice(0, state.effectChain.length - 1)
+      : [];
+    set({
+      audioHistory: history,
+      selectedFile: poppedFile,
+      waveformData: null,
+      spectrogramData: null,
+      fftData: null,
+      analysis: null,
+      effectChain: newEffectChain,
+    });
+    return poppedFile;
+  },
+
+    }),
+    {
+      name: 'audio-store-persist',
+      partialize: (state) => ({ theme: state.theme }),
+    }
+  )
+);
+

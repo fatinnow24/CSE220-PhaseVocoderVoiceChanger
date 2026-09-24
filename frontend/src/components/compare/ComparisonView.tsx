@@ -24,7 +24,7 @@ export default function ComparisonView({ result }: ComparisonViewProps) {
     <div className="flex flex-col gap-5 mt-6">
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
         {/* Phase Vocoder Output Card - Live Oscilloscope soft blue (#dce6f0) */}
-        <div className="bg-[#dce6f0] rounded-[24px] p-5 md:p-6 flex flex-col gap-3 transition-all">
+        <div className="bg-pastel-blue rounded-[24px] p-5 md:p-6 flex flex-col gap-3 transition-all">
           <div className="flex justify-between items-center px-1">
             <h3 className="text-[14px] font-semibold text-ink-primary">Phase Vocoder Output</h3>
             <span className="text-[12px] font-medium text-ink-secondary">
@@ -39,7 +39,7 @@ export default function ComparisonView({ result }: ComparisonViewProps) {
         </div>
 
         {/* Naive Resampling Output Card - Spectrum FFT soft lavender/gray (#e5e3e8) */}
-        <div className="bg-[#e5e3e8] rounded-[24px] p-5 md:p-6 flex flex-col gap-3 transition-all">
+        <div className="bg-pastel-lavender rounded-[24px] p-5 md:p-6 flex flex-col gap-3 transition-all">
           <div className="flex justify-between items-center px-1">
             <h3 className="text-[14px] font-semibold text-ink-primary">Naive Resampling</h3>
             <span className="text-[12px] font-medium text-ink-secondary">

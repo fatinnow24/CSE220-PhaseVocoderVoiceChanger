@@ -1,4 +1,4 @@
-import { useRef, useEffect } from 'react';
+import { useRef, useEffect, useState } from 'react';
 import { useAudioStore } from '../../store/useAudioStore';
 
 /**
@@ -78,8 +78,47 @@ export default function SpectrogramView() {
     });
   }, [spectrogramData]);
 
+  const [hover, setHover] = useState({ visible: false, x: 0, y: 0, label: '' });
+  const containerRef = useRef<HTMLDivElement>(null);
+
+  const handleMouseMove = (e: React.MouseEvent<HTMLDivElement>) => {
+    const container = containerRef.current;
+    if (!container || !spectrogramData) return;
+    const rect = container.getBoundingClientRect();
+    const relX = e.clientX - rect.left;
+    const relY = e.clientY - rect.top;
+    const w = rect.width;
+    const h = rect.height;
+
+    const nTime = spectrogramData.times.length;
+    const nFreq = spectrogramData.frequencies.length;
+    if (nTime === 0 || nFreq === 0) return;
+
+    // x = time, y = frequency (inverted so low freq is bottom)
+    const fIdx = Math.floor((1 - relY / h) * (nFreq - 1));
+    const tIdx = Math.floor((relX / w) * (nTime - 1));
+
+    const clampedFIdx = Math.max(0, Math.min(nFreq - 1, fIdx));
+    const clampedTIdx = Math.max(0, Math.min(nTime - 1, tIdx));
+
+    const time = spectrogramData.times[clampedTIdx];
+    const freq = spectrogramData.frequencies[clampedFIdx];
+    const mag = spectrogramData.magnitude_db[clampedFIdx]?.[clampedTIdx] ?? -80;
+
+    const timeLabel = `Time: ${time.toFixed(2)}s`;
+    const freqLabel = freq >= 1000 ? `Freq: ${(freq / 1000).toFixed(1)}k` : `Freq: ${Math.round(freq)}Hz`;
+    const powLabel = `Power: ${mag.toFixed(0)}dB`;
+    const label = `${timeLabel} | ${freqLabel} | ${powLabel}`;
+
+    const tipW = 220;
+    const tipX = relX + 12 + tipW > w ? relX - tipW - 8 : relX + 12;
+    const tipY = relY - 14;
+
+    setHover({ visible: true, x: tipX, y: tipY, label });
+  };
+
   return (
-    <div className="w-full h-64 bg-transparent rounded-ios-2xl overflow-hidden p-4 flex flex-col">
+    <div className="w-full h-64 bg-transparent rounded-ios-2xl overflow-hidden p-4 flex flex-col select-none">
       <div className="flex justify-between items-center mb-2">
         <h4 className="text-[12px] font-semibold text-ink-secondary">SPECTROGRAM (STFT)</h4>
         {spectrogramData && (
@@ -88,12 +127,25 @@ export default function SpectrogramView() {
           </span>
         )}
       </div>
-      <div className="flex-1 relative rounded-ios-lg overflow-hidden bg-black/5">
+      <div 
+        ref={containerRef}
+        className="flex-1 relative rounded-ios-lg overflow-hidden bg-black/5 cursor-crosshair"
+        onMouseMove={handleMouseMove}
+        onMouseLeave={() => setHover(h => ({ ...h, visible: false }))}
+      >
         <canvas ref={canvasRef} className="absolute inset-0 w-full h-full" />
         {!spectrogramData && (
           <div className="absolute inset-0 flex flex-col items-center justify-center text-ink-tertiary gap-1.5">
             <span className="material-symbols-outlined text-[24px]">graphic_eq</span>
             <p className="text-[12px]">Load audio to compute STFT spectrogram</p>
+          </div>
+        )}
+        {hover.visible && (
+          <div
+            className="absolute bg-ink-primary text-surface px-2.5 py-1 rounded-[10px] text-[11px] font-mono shadow-md pointer-events-none z-30 whitespace-nowrap transition-opacity duration-75"
+            style={{ left: hover.x, top: hover.y }}
+          >
+            {hover.label}
           </div>
         )}
       </div>

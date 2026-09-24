@@ -103,7 +103,7 @@ export default function SignalGenerator({ onSignalChange }: SignalGeneratorProps
         <h3 className="text-[15px] font-semibold text-ink-primary">Waveform Generator</h3>
         <button
           onClick={handleReset}
-          className="flex items-center gap-1.5 px-2.5 py-1 -mr-1 rounded-ios-md text-[12px] font-medium text-ink-secondary hover:text-ink-primary hover:bg-[rgba(38,33,28,0.06)] active:bg-[rgba(38,33,28,0.12)] active:scale-[0.97] transition-all cursor-pointer"
+          className="flex items-center gap-1.5 px-2.5 py-1 -mr-1 rounded-ios-md text-[12px] font-medium text-ink-secondary hover:text-ink-primary hover:bg-hairline active:bg-hairline active:scale-[0.97] transition-all cursor-pointer"
           title="Reset parameters to default"
         >
           <span className="material-symbols-outlined text-[15px]">restart_alt</span>
@@ -119,8 +119,8 @@ export default function SignalGenerator({ onSignalChange }: SignalGeneratorProps
             onClick={() => setSignalType(t)}
             className={`px-3 py-1.5 rounded-ios-lg text-[12px] capitalize transition-all select-none ${
               signalType === t 
-                ? 'bg-[#26211c] text-[#ffffff] font-semibold tracking-tight' 
-                : 'bg-transparent text-[#26211c] font-normal border border-[rgba(38,33,28,0.14)] hover:bg-[rgba(38,33,28,0.04)]'
+                ? 'bg-ink-primary text-surface font-semibold tracking-tight' 
+                : 'bg-transparent text-ink-primary font-normal border border-[rgba(38,33,28,0.14)] hover:bg-[rgba(38,33,28,0.04)]'
             }`}
           >
             {t.replace('_', ' ')}
@@ -139,7 +139,7 @@ export default function SignalGenerator({ onSignalChange }: SignalGeneratorProps
           value={signalName}
           onChange={(e) => setSignalName(e.target.value)}
           placeholder={`e.g. ${autoName}`}
-          className="w-full px-3 py-2 rounded-ios-lg border border-[rgba(38,33,28,0.14)] bg-transparent text-[13px] text-ink-primary placeholder:text-ink-tertiary outline-none focus:border-[#26211c] transition-colors"
+          className="w-full px-3 py-2 rounded-ios-lg border border-[rgba(38,33,28,0.14)] bg-transparent text-[13px] text-ink-primary placeholder:text-ink-tertiary outline-none focus:border-ink-primary transition-colors"
         />
       </div>
 

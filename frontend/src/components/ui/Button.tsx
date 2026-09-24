@@ -26,15 +26,15 @@ export default function Button({
   
   const variants = {
     // Exact checklist.design dark button: crisp white text with font-semibold (600)
-    primary: 'bg-[#26211c] text-[#ffffff] font-semibold tracking-[-0.01em] hover:bg-[#1a1713] active:bg-[#0f0d0b]',
+    primary: 'bg-ink-primary text-surface font-semibold tracking-[-0.01em] hover:bg-ink-primary active:bg-[#0f0d0b]',
     // Exact checklist.design outline/secondary button: rounded-ios-xl, 1px subtle border on cream
-    secondary: 'bg-transparent text-[#26211c] border border-[rgba(38,33,28,0.18)] hover:bg-[rgba(38,33,28,0.04)] active:bg-[rgba(38,33,28,0.08)]',
+    secondary: 'bg-transparent text-ink-primary border border-hairline hover:bg-[rgba(38,33,28,0.04)] active:bg-hairline',
     // Clean transparent hover
     ghost: 'bg-transparent text-ink-secondary hover:text-ink-primary hover:bg-surface-raised active:bg-surface-muted',
     // Delicate soft error fill
     destructive: 'bg-error-soft text-error hover:bg-error hover:text-white active:opacity-90',
     // Pill capsule style
-    pill: 'bg-surface-raised text-ink-primary hover:bg-[#26211c] hover:text-white hover:font-semibold rounded-pill',
+    pill: 'bg-surface-raised text-ink-primary hover:bg-ink-primary hover:text-white hover:font-semibold rounded-pill',
   };
   
   const sizes = {

@@ -195,7 +195,7 @@ export default function Studio() {
           <a
             href={getExportUrl(selectedFile.id)}
             download={selectedFile.original_filename}
-            className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-ios-lg text-[13px] font-medium border border-[rgba(38,33,28,0.18)] text-[#26211c] hover:bg-[rgba(38,33,28,0.04)] active:scale-[0.98] transition-all"
+            className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-ios-lg text-[13px] font-medium border border-hairline text-ink-primary hover:bg-[rgba(38,33,28,0.04)] active:scale-[0.98] transition-all"
             title="Download active processed WAV file"
           >
             <span className="material-symbols-outlined text-[16px]">download</span>
@@ -219,7 +219,7 @@ export default function Studio() {
       {/* Main player */}
       <AudioPlayer url={streamUrl} title={selectedFile.original_filename} />
 
-      {/* Row 1: Direct Bento Visualizers in Checklist Soft Color Variants */}
+      {/* Row 1: Direct Bento Visualizers in Checklist Soft Color Variants (Stacked Vertically) */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
         <StudioWaveform />
         <StudioLiveSignal />

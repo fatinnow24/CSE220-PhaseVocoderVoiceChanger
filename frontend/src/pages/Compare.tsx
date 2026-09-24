@@ -78,10 +78,10 @@ export default function Compare() {
         <AudioPlayer url={streamUrl} title={selectedFile.original_filename} />
       )}
 
-      <div className="bg-[#e3e8e4] rounded-[24px] p-6 flex flex-col gap-5">
+      <div className="bg-pastel-green rounded-[24px] p-6 flex flex-col gap-5">
         <div className="flex items-center justify-between">
-          <h2 className="text-[18px] font-semibold text-[#26211c] tracking-tight">Benchmark Parameters</h2>
-          <span className="text-[12px] font-medium text-[#57534e]">Frequency vs Time Domain</span>
+          <h2 className="text-[18px] font-semibold text-ink-primary tracking-tight">Benchmark Parameters</h2>
+          <span className="text-[12px] font-medium text-ink-secondary">Frequency vs Time Domain</span>
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6 pt-1">
@@ -89,10 +89,10 @@ export default function Compare() {
           <div className="flex flex-col gap-3">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-2.5">
-                <span className="material-symbols-outlined text-[20px] text-[#26211c]">tune</span>
-                <span className="text-[13.5px] font-semibold text-[#26211c] tracking-tight">Target Pitch Shift</span>
+                <span className="material-symbols-outlined text-[20px] text-ink-primary">tune</span>
+                <span className="text-[13.5px] font-semibold text-ink-primary tracking-tight">Target Pitch Shift</span>
               </div>
-              <span className="text-[13px] font-semibold text-[#26211c]">
+              <span className="text-[13px] font-semibold text-ink-primary">
                 {semitones > 0 ? '+' : ''}{semitones} st
               </span>
             </div>
@@ -109,10 +109,10 @@ export default function Compare() {
           <div className="flex flex-col gap-3">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-2.5">
-                <span className="material-symbols-outlined text-[20px] text-[#26211c]">speed</span>
-                <span className="text-[13.5px] font-semibold text-[#26211c] tracking-tight">Target Time Stretch</span>
+                <span className="material-symbols-outlined text-[20px] text-ink-primary">speed</span>
+                <span className="text-[13.5px] font-semibold text-ink-primary tracking-tight">Target Time Stretch</span>
               </div>
-              <span className="text-[13px] font-semibold text-[#26211c]">
+              <span className="text-[13px] font-semibold text-ink-primary">
                 {stretchFactor.toFixed(2)}x
               </span>
             </div>
