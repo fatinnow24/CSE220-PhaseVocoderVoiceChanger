@@ -37,7 +37,7 @@ export default function Dashboard() {
       {/* Header */}
       <header className="space-y-2">
         <h1 className="text-[28px] md:text-[34px] font-semibold text-ink-primary tracking-tight">
-          Audio Processing Workspace
+          Welcome to PhasePlay!
         </h1>
         <p className="text-[14px] text-ink-secondary max-w-xl leading-relaxed">
           Manipulate pitch and duration independently using Short-Time Fourier Transform phase unwrapping and phase-locked resynthesis.
