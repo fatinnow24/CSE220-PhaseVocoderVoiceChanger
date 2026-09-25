@@ -124,11 +124,11 @@ export default function DurationExplanation({
                       <span className="font-semibold text-ink-secondary">
                         <span className="font-sans">÷ 2</span>
                         <sup
-                          className="inline-flex flex-col items-center text-[9px] leading-[0.85] mx-0.5 font-sans"
-                          style={{ transform: 'translateY(-0.45em)' }}
+                          className="inline-flex flex-col items-center justify-center align-middle text-[9px] leading-[1] mx-0.5 font-sans"
+                          style={{ height: '1.8em', verticalAlign: '0.4em' }}
                         >
-                          <span>{semitones}</span>
-                          <span className="border-t border-current px-0.5">12</span>
+                          <span className="leading-none">{semitones}</span>
+                          <span className="border-t border-current px-0.5 leading-none mt-0.5">12</span>
                         </sup>
                         <span className="font-sans"> = {pitchFactor.toFixed(4)}</span>
                       </span>
