@@ -1,6 +1,7 @@
 import { useRef, useEffect, useState, useMemo } from 'react'; // eslint-disable-line
 import Card from '../../ui/Card';
 import Select from '../../ui/Select';
+import Latex from '../../ui/Latex';
 
 export default function ConvolutionSimulation() {
   const canvasRef = useRef<HTMLCanvasElement>(null);
@@ -78,7 +79,7 @@ export default function ConvolutionSimulation() {
           ctx.stroke();
 
           for(let i=0; i<data.length; i++) {
-            const x = 20 + i * 4;
+            const x = 20 + (i / Math.max(data.length - 1, 1)) * (rect.width - 40);
             const y = yOffset + panelH / 2 - data[i] * (panelH/2 - 10);
             
             ctx.beginPath();
@@ -131,10 +132,10 @@ export default function ConvolutionSimulation() {
         />
       </div>
 
-      <canvas ref={canvasRef} className="w-full h-64 bg-surface-container-lowest rounded-xl shadow-inner mb-4" />
+      <canvas ref={canvasRef} className="w-full h-96 md:h-[28rem] bg-surface-container-lowest rounded-xl shadow-inner mb-4" />
       
       <div className="bg-primary-container p-4 rounded-xl text-on-primary-container text-body-sm font-mono mb-4">
-        <p>y[n] = Σ_k x[k] h[n-k]</p>
+        <Latex math="y[n] = \sum_k x[k] h[n-k]" block />
       </div>
 
       <div className="text-body-sm text-on-surface-variant italic space-y-2">

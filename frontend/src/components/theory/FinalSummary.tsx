@@ -22,25 +22,25 @@ export default function FinalSummary() {
       {/* Animated Flow */}
       <div className="bg-surface-container-lowest p-8 rounded-3xl shadow-card border border-outline-variant">
         <div className="flex flex-col items-center text-center space-y-4 font-mono font-bold text-sm">
-          <div className="bg-primary text-on-primary px-6 py-2 rounded-full w-64">Signals & Systems</div>
+          <div className="bg-white text-black border-2 border-black px-6 py-2 rounded-xl w-64">Signals & Systems</div>
           <div className="text-primary">↓</div>
-          <div className="bg-primary-container text-on-primary-container px-6 py-2 rounded-full w-64">Sampling Theory</div>
+          <div className="bg-white text-black border-2 border-black px-6 py-2 rounded-xl w-64">Sampling Theory</div>
           <div className="text-primary">↓</div>
-          <div className="bg-primary-container text-on-primary-container px-6 py-2 rounded-full w-64">Fourier Analysis (DFT/FFT)</div>
+          <div className="bg-white text-black border-2 border-black px-6 py-2 rounded-xl w-64">Fourier Analysis (DFT/FFT)</div>
           <div className="text-primary">↓</div>
-          <div className="bg-primary-container text-on-primary-container px-6 py-2 rounded-full w-64">STFT</div>
+          <div className="bg-white text-black border-2 border-black px-6 py-2 rounded-xl w-64">STFT</div>
           <div className="text-primary">↓</div>
-          <div className="bg-secondary-container text-on-secondary-container px-6 py-2 rounded-full w-64">Magnitude + Phase Analysis</div>
+          <div className="bg-white text-black border-2 border-black px-6 py-2 rounded-xl w-64">Magnitude + Phase Analysis</div>
           <div className="text-primary">↓</div>
-          <div className="bg-secondary-container text-on-secondary-container px-6 py-2 rounded-full w-64">Phase-Vocoder Processing</div>
+          <div className="bg-white text-black border-2 border-black px-6 py-2 rounded-xl w-64">Phase-Vocoder Processing</div>
           <div className="text-primary">↓</div>
-          <div className="bg-surface-container-high text-on-surface px-6 py-2 rounded-full w-64 border border-outline">Time-Scale Modification</div>
+          <div className="bg-white text-black border-2 border-black px-6 py-2 rounded-xl w-64">Time-Scale Modification</div>
           <div className="text-primary">↓</div>
-          <div className="bg-surface-container-high text-on-surface px-6 py-2 rounded-full w-64 border border-outline">Resampling</div>
+          <div className="bg-white text-black border-2 border-black px-6 py-2 rounded-xl w-64">Reconstruction (WOLA)</div>
           <div className="text-primary">↓</div>
-          <div className="bg-surface-container-high text-on-surface px-6 py-2 rounded-full w-64 border border-outline">Reconstruction (WOLA)</div>
+          <div className="bg-white text-black border-2 border-black px-6 py-2 rounded-xl w-64">Resampling</div>
           <div className="text-primary">↓</div>
-          <div className="bg-primary text-on-primary px-6 py-2 rounded-full w-64 text-lg">Pitch-Shifted Audio</div>
+          <div className="bg-white text-black border-2 border-black px-6 py-2 rounded-xl w-64 text-lg">Pitch-Shifted Audio</div>
         </div>
       </div>
 

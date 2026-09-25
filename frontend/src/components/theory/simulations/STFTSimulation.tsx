@@ -48,7 +48,8 @@ export default function STFTSimulation() {
     ctx.stroke();
 
     // Draw sliding window
-    const windowStart = currentPos;
+    // Keep array lookups discrete while allowing the window animation to move smoothly.
+    const windowStart = Math.floor(currentPos);
     const windowEnd = currentPos + windowSize;
     const startX = (windowStart / totalSamples) * width;
     const endX = (windowEnd / totalSamples) * width;
