@@ -121,7 +121,17 @@ export default function DurationExplanation({
                   <>
                     <div className="flex flex-col items-center text-ink-tertiary text-[12px] my-1">
                       <DoodlyArrow className="text-ink-secondary my-1" />
-                      <span className="font-semibold text-ink-secondary">÷ {pitchFactor.toFixed(4)}</span>
+                      <span className="font-semibold text-ink-secondary">
+                        <span className="font-sans">÷ 2</span>
+                        <sup
+                          className="inline-flex flex-col items-center text-[9px] leading-[0.85] mx-0.5 font-sans"
+                          style={{ transform: 'translateY(-0.45em)' }}
+                        >
+                          <span>{semitones}</span>
+                          <span className="border-t border-current px-0.5">12</span>
+                        </sup>
+                        <span className="font-sans"> = {pitchFactor.toFixed(4)}</span>
+                      </span>
                     </div>
                     <div className="text-ink-primary">{naiveAfterPitch.toFixed(2)} s</div>
                   </>
