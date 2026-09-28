@@ -1,4 +1,4 @@
-# CSE 220: Phase Vocoder & Voice Changer Studio
+# CSE 220: PhasePlay, an Interactive Phase Vocoder & Voice Changer Studio
 
 ## 📌 Project Overview
 
